@@ -1,95 +1,133 @@
+/** Table
+ */
+
 import java.util.List;
 import java.util.ArrayList;
+
+import java.util.Map;
+import java.util.HashMap;
 
 public class Table {
     private final static Object NOVALUE = new Object();
     private final static Object NAN = new Object();
 
     private enum Type {
-        INT, FLOAT, STRING
+        INT, FLOAT, STRING;
     }
 
-    private final String[] names;
-    private final Type[] types;
-    private final List[] columns;
-    private int numRows;
+    private class Column {
+        private final String name;
+        private final Type type;
+        private final List<Object> values;
 
-    public Table(String[] columnNames, Type[] columnTypes) {
-        names = columnNames;
-        types = columnTypes;
-        columns = new ArrayList[names.length];
-        for (int index = 0; index < columns.length; index++) {
-            columns[index] = new ArrayList<Object>();
+        private Column(String name, Type type) {
+            this.name = name;
+            this.type = type;
+            values = new ArrayList<>();
         }
-        numRows = 0;
+
+        private Object get(int index) {
+            return values.get(index);
+        }
+
+        private int rows() {
+            return values.size();
+        }
+
+        private void append(Object item) {
+            values.add(item);
+        }
+    }
+
+    private final Column[] columns;
+
+    public Table(String[] names, Type[] types) {
+        assert names.length == types.length;
+        columns = new Column[names.length];
+
+        for (int index = 0; index < columns.length; index++) {
+            columns[index] = new Column(names[index], types[index]);
+        }
     }
 
     public void insert(Object... row) {
-        if (row.length != columns.length) {
-            throw new IllegalArgumentException("row width not equal to " +
-                                               "number of columns");
-        }
+        assert row.length == columns.length;
+
         for (int index = 0; index < columns.length; index++) {
+            Column column = columns[index];
             Object value = row[index];
-            if(value != NAN && value != NOVALUE) {
-                switch(types[index]) {
+
+            if (value != NOVALUE && (value != NAN &&
+                                     column.type != Type.STRING)) {
+                switch (column.type) {
                     case INT:
-                        if (!(value instanceof Integer)) {
-                            throw new IllegalArgumentException("");
-                        }
+                        assert value instanceof Integer;
                         break;
                     case FLOAT:
-                        if (!(value instanceof Double)) {
-                            throw new IllegalArgumentException("");
-                        }
+                        assert value instanceof Double;
                         break;
                     case STRING:
-                        if (!(value instanceof String)) {
-                            throw new IllegalArgumentException("");
-                        }
+                        assert value instanceof String;
                         break;
+                    default:
+                        assert false;  // Should never reach here
                 }
             }
-            columns[index].add(value);
-        }
-        numRows++;
-    }
 
-    public Table join(Table other) {
-        List<String> common = new ArrayList<>();
-        for (String name : names) {
-            for (String otherName : other.names) {
-                if (name == otherName) {
-                    common.add(name);
-                }
-            }
+            column.append(value);
         }
-        for (String name : common) {
-            //
-        }
-        return null;
     }
 
     public String toString() {
-        String s = "";
-        for (int i = 0; i < numRows; i++) {
-            for (int j = 0; j < columns.length; j++) {
-                Object obj = columns[j].get(i);
-                String repr = obj.toString();
-                if (obj == NAN) {
+        StringBuilder str = new StringBuilder(1024);
+
+        for (Column column : columns) {
+            str.append(column.name);
+            str.append(' ');
+        }
+        str.append('\n');
+
+        assert columns.length > 0;
+        int rows = columns[0].rows();
+        for (int index = 0; index < rows; index++) {
+            for (Column column : columns) {
+                Object value = column.get(index);
+                String repr = "NOVALUE";
+                if (value == NAN) {
                     repr = "NAN";
                 }
-                else if (obj == NOVALUE) {
-                    repr = "NOVALUE";
+                else {
+                    repr = value.toString();
+                    if (value instanceof String) {
+                        repr = '"' + repr + '"';
+                    }
                 }
-                else if (obj instanceof String) {
-                    repr = '"' + repr + '"';
-                }
-                s += repr + " ";
+                str.append(repr);
+                str.append(' ');
             }
-            s += "\n";
+            str.append('\n');
         }
-        return s;
+
+        return str.toString();
+    }
+
+    public Table join(Table other) {
+        List<Integer> indices = new ArrayList<>();
+        List<Integer> otherIndices = new ArrayList<>();
+
+        for (int i = 0; i < columns.length; i++) {
+            for (int j = 0; j < other.columns.length; j++) {
+                Column column = columns[i], otherColumn = other.columns[j];
+                if (column.name.equals(otherColumn.name)) {
+                    indices.add(i);
+                    otherIndices.add(j);
+                }
+            }
+        }
+
+        System.out.println(indices + " " + otherIndices);
+
+        return null;
     }
 
     public static void main(String[] args) {
@@ -98,13 +136,24 @@ public class Table {
         tbl.insert("Hello", 18.0);
         tbl.insert("World", 10.0);
         tbl.insert("Something", NAN);
-        System.out.print(tbl);
+        System.out.println(tbl);
 
-        Table other = new Table(new String[] {"name", "status"},
-                                new Type[] {Type.STRING, Type.STRING});
-        other.insert("Hello", "OK");
-        System.out.print(other);
+        Table t7 = new Table(new String[] {"X", "Y", "Z", "W"},
+                             new Type[] {Type.INT, Type.INT, Type.INT, Type.INT});
+        t7.insert(1, 7, 2, 10);
+        t7.insert(7, 7, 4, 1);
+        t7.insert(1, 9, 9, 1);
+        System.out.println(t7);
 
-        Table joined = tbl.join(other);
+        Table t8 = new Table(new String[] {"W", "B", "Z"},
+                             new Type[] {Type.INT, Type.INT, Type.INT});
+        t8.insert(1, 7, 4);
+        t8.insert(7, 7, 3);
+        t8.insert(1, 9, 6);
+        t8.insert(1, 11, 9);
+        System.out.println(t8);
+
+        Table t9 = t7.join(t8);
+        System.out.println(t9);
     }
 }
