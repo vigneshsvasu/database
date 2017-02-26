@@ -22,10 +22,6 @@ public class Table {
             this.values = new ArrayList<>();
         }
 
-        private void append(Value value) {
-            values.add(value);
-        }
-
         @Override
         public Iterator iterator() {
             return values.iterator();
@@ -51,7 +47,7 @@ public class Table {
     public void insert(Value[] row) {
         assert row.length == columns.length;
         for (int index = 0; index < row.length; index++) {
-            columns[index].append(row[index]);
+            columns[index].values.add(row[index]);
         }
     }
 
@@ -75,7 +71,9 @@ public class Table {
                         rowAsValues[index] = new FloatValue(Double.parseDouble(rowValue));
                         break;
                     case STRING:
-                        rowAsValues[index] = new StringValue(rowValue);
+                        char end = rowValue.charAt(rowValue.length() - 1);
+                        assert rowValue.charAt(0) == '"' && end == '"';
+                        rowAsValues[index] = new StringValue(rowValue.substring(1, rowValue.length() - 1));
                         break;
                 }
             }
@@ -83,8 +81,11 @@ public class Table {
         insert(rowAsValues);
     }
     public Value[] get(int index){
-        for (int i = 0; i < columns.length; i++){
-            
+        Value[] newArray = new Value[columns.length];
+        for(int i = 0; i < columns.length; i++){
+            Column col = columns[i];
+            newArray[i] = col.values.get(index);
         }
+        return newArray;
     }
 }
