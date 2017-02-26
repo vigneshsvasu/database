@@ -1,4 +1,4 @@
-package db;
+package db.values;
 
-interface Value {
+public interface Value {
 }

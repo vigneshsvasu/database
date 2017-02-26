@@ -1,13 +1,13 @@
-package db;
+package db.values;
 
-class StringValue implements Value {
+public class StringValue implements Value {
     private final char[] value;
 
-    StringValue(char[] value) {
+    public StringValue(char[] value) {
         this.value = value;
     }
 
-    StringValue(String value) {
+    public StringValue(String value) {
         this(value.toCharArray());
     }
 

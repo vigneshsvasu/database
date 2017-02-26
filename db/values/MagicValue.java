@@ -1,17 +1,25 @@
-package db;
+package db.values;
 
-class MagicValue implements Value {
-    static final Value NAN = new MagicValue("NAN");
-    static final Value NOVALUE = new MagicValue("NOVALUE");
+public class MagicValue implements Value {
+    private static final Value NAN = new MagicValue("NAN");
+    private static final Value NOVALUE = new MagicValue("NOVALUE");
 
     private final String repr;
 
-    MagicValue(String repr) {
+    public MagicValue(String repr) {
         this.repr = repr;
     }
 
     @Override
     public String toString() {
         return repr;
+    }
+
+    public boolean isNAN(Value other) {
+        return other == NAN;
+    }
+
+    public boolean isNOVALUE(Value other) {
+        return other == NOVALUE;
     }
 }
