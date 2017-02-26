@@ -89,4 +89,17 @@ public class Table {
         }
         return newArray;
     }
+
+    public String toString(){
+      String returnString = " ";
+      for (int i = 0; i < columns[0].values.length; i++){
+        for (int j = 0; j < columns.length; j++){
+          if (j = columns.length - 1){
+            returnString += columns[i].values.get(j);
+          }
+          returnString = returnString + columns[i].values.get(j) + ",";
+        }
+        returnString = returnString + "\n";
+      }
+    }
 }
