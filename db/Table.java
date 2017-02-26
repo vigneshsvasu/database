@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import db.values.Value;
+import db.values.IntValue;
+import db.values.FloatValue;
+import db.values.StringValue;
 
 public class Table {
     private class Column implements Iterable {
@@ -56,7 +59,18 @@ public class Table {
         Value[] rowAsValues = new Value[row.length];
         for (int index = 0; index < row.length; index++) {
             Type type = columns[index].type;
-            // TODO
+            switch (type) {
+                case INT:
+                    rowAsValues[index] =  new IntValue(Integer.parseInt(row[index]));
+                    break;
+                case FLOAT:
+                    rowAsValues[index] =  new FloatValue(Double.parseDouble(row[index]));
+                    break;
+                case STRING:
+                    rowAsValues[index] =  new StringValue(row[index]);
+                    break;
+            }
         }
+        insert(rowAsValues);
     }
 }
