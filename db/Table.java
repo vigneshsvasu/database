@@ -21,10 +21,6 @@ public class Table {
             this.values = new ArrayList<>();
         }
 
-        private void append(Value value) {
-            values.add(value);
-        }
-
         @Override
         public Iterator iterator() {
             return values.iterator();
@@ -74,7 +70,8 @@ public class Table {
                         rowAsValues[index] = new FloatValue(Double.parseDouble(rowValue));
                         break;
                     case STRING:
-                        rowAsValues[index] = new StringValue(rowValue);
+                        assert rowValue.charAt(0) == rowValue.charAt(rowValue.length() - 1) == '"';
+                        rowAsValues[index] = new StringValue(rowValue.substring(1, rowValue.length() - 1));
                         break;
                 }
             }
