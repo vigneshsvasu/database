@@ -8,6 +8,7 @@ import db.values.Value;
 import db.values.IntValue;
 import db.values.FloatValue;
 import db.values.StringValue;
+import db.values.MagicValue;
 
 public class Table {
     private class Column implements Iterable {
@@ -80,5 +81,10 @@ public class Table {
             }
         }
         insert(rowAsValues);
+    }
+    public Value[] get(int index){
+        for (int i = 0; i < columns.length; i++){
+            
+        }
     }
 }
