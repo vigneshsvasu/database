@@ -80,6 +80,7 @@ public class Table {
         }
         insert(rowAsValues);
     }
+
     public Value[] get(int index){
         Value[] newArray = new Value[columns.length];
         for(int i = 0; i < columns.length; i++){
