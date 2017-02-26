@@ -58,17 +58,25 @@ public class Table {
         assert row.length == columns.length;
         Value[] rowAsValues = new Value[row.length];
         for (int index = 0; index < row.length; index++) {
-            Type type = columns[index].type;
-            switch (type) {
-                case INT:
-                    rowAsValues[index] =  new IntValue(Integer.parseInt(row[index]));
-                    break;
-                case FLOAT:
-                    rowAsValues[index] =  new FloatValue(Double.parseDouble(row[index]));
-                    break;
-                case STRING:
-                    rowAsValues[index] =  new StringValue(row[index]);
-                    break;
+            String rowValue = row[index];
+            if (MagicValue.NAN.equals(rowValue)) {
+                rowAsValues[index] = MagicValue.NAN;
+            }
+            else if (MagicValue.NOVALUE.equals(rowValue)) {
+                rowAsValues[index] = MagicValue.NOVALUE;
+            }
+            else {
+                switch (columns[index].type) {
+                    case INT:
+                        rowAsValues[index] = new IntValue(Integer.parseInt(rowValue));
+                        break;
+                    case FLOAT:
+                        rowAsValues[index] = new FloatValue(Double.parseDouble(rowValue));
+                        break;
+                    case STRING:
+                        rowAsValues[index] = new StringValue(rowValue);
+                        break;
+                }
             }
         }
         insert(rowAsValues);
