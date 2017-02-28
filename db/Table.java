@@ -91,6 +91,7 @@ public class Table {
     }
 
     public String toString(){
+      
       String returnString = " ";
       for (int i = 0; i < columns[0].values.size(); i++){
         for (int j = 0; j < columns.length; j++){

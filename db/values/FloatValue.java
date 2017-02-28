@@ -11,7 +11,7 @@ public class FloatValue implements Value {
 
     @Override
     public String toString() {
-        return "";
+        return String.format("%.3f", value);
     }
 
     public double getValue() {
