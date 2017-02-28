@@ -1,6 +1,6 @@
 package db;
 
-enum Type {
+public enum Type {
     INT(true), FLOAT(true), STRING(false);
 
     private boolean isNumeric;
@@ -9,7 +9,7 @@ enum Type {
         this.isNumeric = isNumeric;
     }
 
-    boolean isNumeric() {
+    public boolean isNumeric() {
         return this.isNumeric;
     }
 }

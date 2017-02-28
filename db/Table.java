@@ -44,41 +44,19 @@ public class Table {
         }
     }
 
+    public int columnCount() {
+        return columns.length;
+    }
+
+    public Type getType(int index) {
+        return columns[index].type;
+    }
+
     public void insert(Value[] row) {
         assert row.length == columns.length;
         for (int index = 0; index < row.length; index++) {
             columns[index].values.add(row[index]);
         }
-    }
-
-    public void insert(String[] row) {
-        assert row.length == columns.length;
-        Value[] rowAsValues = new Value[row.length];
-        for (int index = 0; index < row.length; index++) {
-            String rowValue = row[index];
-            if (MagicValue.NAN.equals(rowValue)) {
-                rowAsValues[index] = MagicValue.NAN;
-            }
-            else if (MagicValue.NOVALUE.equals(rowValue)) {
-                rowAsValues[index] = MagicValue.NOVALUE;
-            }
-            else {
-                switch (columns[index].type) {
-                    case INT:
-                        rowAsValues[index] = new IntValue(Integer.parseInt(rowValue));
-                        break;
-                    case FLOAT:
-                        rowAsValues[index] = new FloatValue(Double.parseDouble(rowValue));
-                        break;
-                    case STRING:
-                        char end = rowValue.charAt(rowValue.length() - 1);
-                        assert rowValue.charAt(0) == '"' && end == '"';
-                        rowAsValues[index] = new StringValue(rowValue.substring(1, rowValue.length() - 1));
-                        break;
-                }
-            }
-        }
-        insert(rowAsValues);
     }
 
     public Value[] get(int index){
@@ -90,7 +68,7 @@ public class Table {
         return newArray;
     }
 
-    public String toString(){
+    public String toString() {
         String returnString = " ";
         for (int i = 0; i < columns[0].values.size(); i++){
             for (int j = 0; j < columns.length; j++){
