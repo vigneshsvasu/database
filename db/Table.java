@@ -92,14 +92,15 @@ public class Table {
 
     public String toString(){
       String returnString = " ";
-      for (int i = 0; i < columns[0].values.length; i++){
+      for (int i = 0; i < columns[0].values.size(); i++){
         for (int j = 0; j < columns.length; j++){
-          if (j = columns.length - 1){
+          if (j == columns.length - 1){
             returnString += columns[i].values.get(j);
           }
           returnString = returnString + columns[i].values.get(j) + ",";
         }
         returnString = returnString + "\n";
       }
+      return returnString;
     }
 }
