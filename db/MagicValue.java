@@ -1,4 +1,4 @@
-package db.values;
+package db;
 
 public class MagicValue implements Value {
     public static final Value NAN = new MagicValue("NAN");

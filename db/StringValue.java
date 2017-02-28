@@ -1,4 +1,4 @@
-package db.values;
+package db;
 
 public class StringValue implements Value {
     private final char[] value;

@@ -1,4 +1,4 @@
-package db.values;
+package db;
 
 public class IntValue implements Value {
     private final int value;

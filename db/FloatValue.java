@@ -1,4 +1,4 @@
-package db.values;
+package db;
 
 public class FloatValue implements Value {
     private static final double PRECISION = 1e-3;

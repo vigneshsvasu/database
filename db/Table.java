@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import db.values.Value;
-import db.values.IntValue;
-import db.values.FloatValue;
-import db.values.StringValue;
-import db.values.MagicValue;
+import db.Value;
+import db.IntValue;
+import db.FloatValue;
+import db.StringValue;
+import db.MagicValue;
 
 public class Table {
     private class Column implements Iterable {
