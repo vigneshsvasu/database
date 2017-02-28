@@ -10,8 +10,8 @@ import db.FloatValue;
 import db.StringValue;
 import db.MagicValue;
 
-public class Table {
-    private class Column implements Iterable {
+public class Table implements Iterable<Value[]> {
+    private class Column implements Iterable<Value> {
         private final String name;
         private final Type type;
         private final List<Value> values;
@@ -19,17 +19,48 @@ public class Table {
         private Column(String name, Type type) {
             this.name = name;
             this.type = type;
-            this.values = new ArrayList<>();
+            values = new ArrayList<>();
         }
 
         @Override
-        public Iterator iterator() {
+        public Iterator<Value> iterator() {
             return values.iterator();
         }
 
         private Column addTo(Column other) {
             // TOOD
             return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private class RowIterator implements Iterator<Value[]> {
+        private Iterator<Value>[] columnIterators;
+
+        private RowIterator() {
+            columnIterators = new Iterator[columnCount()];
+            for (int index = 0; index < columnIterators.length; index++) {
+                columnIterators[index] = columns[index].iterator();
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            for (Iterator<Value> iter : columnIterators) {
+                if (!iter.hasNext()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public Value[] next() {
+            Value[] row = new Value[columnIterators.length];
+            for (int index = 0; index < columnIterators.length; index++) {
+                row[index] = columnIterators[index].next();
+            }
+            return row;
         }
     }
 
@@ -44,8 +75,17 @@ public class Table {
         }
     }
 
+    @Override
+    public Iterator<Value[]> iterator() {
+        return new RowIterator();
+    }
+
     public int columnCount() {
         return columns.length;
+    }
+
+    public int rowCount() {
+        return columns[0].values.size();
     }
 
     public Type getType(int index) {
