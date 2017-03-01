@@ -24,7 +24,7 @@ public class Parser {
     }
 
     public static Table constructEmptyTable(String[] columnMetadata)
-                         throws InvalidSyntaxException {
+                        throws InvalidSyntaxException {
         int numColumns = columnMetadata.length;
         String[] columnNames = new String[numColumns];
         Type[] columnTypes = new Type[numColumns];
@@ -46,6 +46,30 @@ public class Parser {
         return new Table(columnNames, columnTypes);
     }
 
+    private static Value parseValue(String repr, Type type)
+                         throws InvalidSyntaxException {
+        switch (type) {
+            case INT:
+                return new IntValue(Integer.parseInt(repr));
+
+            case FLOAT:
+                return new FloatValue(Double.parseDouble(repr));
+
+            case STRING:
+                char start = repr.charAt(0);
+                char end = repr.charAt(repr.length() - 1);
+                if (!(start == '\'' && end == '\'')) {
+                    String message = String.format("string value \"{0}\" "
+                        + "not quoted", repr);
+                    throw new InvalidSyntaxException(message);
+                }
+                return new StringValue(repr);
+
+            default:
+                throw new InvalidSyntaxException("no such type");
+        }
+    }
+
     public static void populateRow(Table table, String row)
             throws InvalidSyntaxException {
         String[] symbols = row.split(COLUMN_DELIMETER);
@@ -64,34 +88,14 @@ public class Parser {
             } else if (MagicValue.NOVALUE.equals(symbol)) {
                 values[index] = MagicValue.NOVALUE;
             } else {
-                switch (table.getType(index)) {
-                    case INT:
-                        values[index] = new IntValue(Integer.parseInt(symbol));
-                        break;
-                    case FLOAT:
-                        values[index] = new FloatValue(Double.parseDouble(symbol));
-                        break;
-                    case STRING:
-                        char start = symbol.charAt(0);
-                        char end = symbol.charAt(symbol.length() - 1);
-                        if (!(start == '\'' && end == '\'')) {
-                            String message = String.format(
-                                "string value \"{0}\" not quoted", symbol);
-                            throw new InvalidSyntaxException(message);
-                        }
-                        values[index] = new StringValue(symbol.substring(1,
-                            symbol.length() - 1));
-                        break;
-                    default:
-                        throw new InvalidSyntaxException("no such type");
-                }
+                values[index] = parseValue(symbol, table.getType(index));
             }
         }
 
         table.insert(values);
     }
 
-    /** Construct a Table from an input
+    /** Construct a Table from an input buffered reader.
      *
      *  Reference:
      *  https://docs.oracle.com/javase/tutorial/essential/io/file.html#textfiles

@@ -88,6 +88,10 @@ public class Table implements Iterable<Value[]> {
         return columns[0].values.size();
     }
 
+    public String getName(int index) {
+        return columns[index].name;
+    }
+
     public Type getType(int index) {
         return columns[index].type;
     }
