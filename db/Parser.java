@@ -5,15 +5,27 @@ import java.io.IOException;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.StringJoiner;
 
 public class Parser {
     private static final String COLUMN_DELIMETER = ",";
-    private static final String NAME = "[a-zA-Z]\\w*";
+
+    private static final String NAME_GROUP = "([a-zA-Z]\\w*)";
+    private static final String FILENAME_GROUP = "(.+)";
+
+    private static final Pattern LOAD_CMD = Pattern.compile("load\\s+" + FILENAME_GROUP);
+    private static final Pattern STORE_CMD = Pattern.compile("store\\s+" + FILENAME_GROUP);
+    // private static final
+    private static final Pattern DROP_CMD = Pattern.compile("drop\\s+table\\s+" + NAME_GROUP);
+
+    // private static final String SELECT_CMD = ""
+
+    // private static final Pattern CREATE_CMD = Pattern.compile("create\\s+table\\s+" + NAME_GROUP + "\\s+(as\\s+*)")
 
     private static final Pattern COLUMN_METADATA_PATTERN = Pattern.compile(
-                                 "(" + NAME + ")\\s+(int|float|string)");
+                                 NAME_GROUP + "\\s+(int|float|string)");
 
-    private static class InvalidSyntaxException extends Exception {
+    public static class InvalidSyntaxException extends Exception {
         private InvalidSyntaxException(String message) {
             super(message);
         }
@@ -30,7 +42,7 @@ public class Parser {
         Type[] columnTypes = new Type[numColumns];
 
         for (int index = 0; index < numColumns; index++) {
-            String metadata = columnMetadata[index];
+            String metadata = columnMetadata[index].trim();
             Matcher match = COLUMN_METADATA_PATTERN.matcher(metadata);
 
             if (match.matches()) {
@@ -63,7 +75,7 @@ public class Parser {
                         + "not quoted", repr);
                     throw new InvalidSyntaxException(message);
                 }
-                return new StringValue(repr);
+                return new StringValue(repr.substring(1, repr.length() - 1));
 
             default:
                 throw new InvalidSyntaxException("no such type");
@@ -82,7 +94,7 @@ public class Parser {
 
         Value[] values = new Value[numColumns];
         for (int index = 0; index < numColumns; index++) {
-            String symbol = symbols[index];
+            String symbol = symbols[index].trim();
             if (MagicValue.NAN.equals(symbol)) {
                 values[index] = MagicValue.NAN;
             } else if (MagicValue.NOVALUE.equals(symbol)) {
@@ -95,7 +107,7 @@ public class Parser {
         table.insert(values);
     }
 
-    /** Construct a Table from an input buffered reader.
+    /** Construct a Table from the contents of a buffered reader.
      *
      *  Reference:
      *  https://docs.oracle.com/javase/tutorial/essential/io/file.html#textfiles
