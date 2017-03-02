@@ -15,21 +15,22 @@ public class Parser {
 
     private static final String NAME = "([a-zA-Z]\\w*)";
     private static final String TYPE = "(int|float|string)";
-    private static final String FILE_PATH = "(?<file-path>.+)";
+    private static final String FILE_PATH = "(?<file>.+)";
 
     // Command patterns
-    private static final Pattern LOAD_CMD = makeRegex("load\\s+" + FILE_PATH);
-    private static final Pattern STORE_CMD = makeRegex("store\\s+" + FILE_PATH);
-    private static final Pattern SELECT_CMD = makeRegex(
-        "select\\s+(?<columns>.+)\\s+from\\s+(?<tables>.+?)"
+    private static final Pattern LOAD_CMD = makeCommand("load", FILE_PATH);
+    private static final Pattern STORE_CMD = makeCommand("store", FILE_PATH);
+    private static final Pattern CREATE_CMD = makeCommand("create",
+        "table\\s+" + NAME + "(?:\\s+\\((?<columns>.+)\\)|\\s+as\\s+(?<select>.+))");
+    private static final Pattern DROP_CMD = makeCommand("drop", "table\\s+" + NAME);
+    private static final Pattern SELECT_CMD = makeCommand("select",
+        "(?<columns>.+)\\s+from\\s+(?<tables>.+?)"
         + "(?:\\s+where\\s+(?<conditions>.+))?");
-    private static final Pattern CREATE_CMD = makeRegex(
-        "create\\s+table\\s+" + NAME
-        + "(?:\\s+\\((?<column-data>.+)\\)|\\s+as\\s+(?<select-clause>.+))");
-    private static final Pattern DROP_CMD = makeRegex("drop\\s+table\\s+" + NAME);
-    private static final Pattern INSERT_CMD = makeRegex(
-        "insert\\s+into\\s+" + NAME + "\\s+values\\s+(?<literals>.+)");
-    private static final Pattern PRINT_CMD = makeRegex("print\\s+" + NAME);
+    private static final Pattern INSERT_CMD = makeCommand("insert",
+        "into\\s+" + NAME + "\\s+values\\s+(?<literals>.+)");
+    private static final Pattern PRINT_CMD = makeCommand("print", NAME);
+    private static final Pattern[] COMMANDS = {LOAD_CMD, STORE_CMD, CREATE_CMD,
+        DROP_CMD, SELECT_CMD, INSERT_CMD, PRINT_CMD};
 
     // Common patterns
     private static final Pattern COLUMN_METADATA_PATTERN = makeRegex(
@@ -39,19 +40,25 @@ public class Parser {
         return Pattern.compile("^\\s*" + baseExpr + "\\s*$");
     }
 
+    private static Pattern makeCommand(String name, String rest) {
+        return makeRegex("(?<command>" + name + ")\\s+" + rest);
+    }
+
     public static class InvalidSyntaxException extends Exception {
         private InvalidSyntaxException(String message) {
             super(message);
         }
     }
 
-    private enum Command {
-        //
-    }
-
-    // TODO: trim strings
-
-    public void parseQuery(String query) {
+    public static Matcher parseQuery(String query) {
+        Matcher match = null;
+        for (Pattern cmd : COMMANDS) {
+            match = cmd.matcher(query);
+            if (match.matches()) {
+                return match;
+            }
+        }
+        return null;
     }
 
     public static Table constructEmptyTable(String[] columnMetadata)
@@ -61,7 +68,7 @@ public class Parser {
         Type[] columnTypes = new Type[numColumns];
 
         for (int index = 0; index < numColumns; index++) {
-            String metadata = columnMetadata[index].trim();
+            String metadata = columnMetadata[index];
             Matcher match = COLUMN_METADATA_PATTERN.matcher(metadata);
 
             if (match.matches()) {
@@ -102,7 +109,7 @@ public class Parser {
     }
 
     public static void populateRow(Table table, String row)
-            throws InvalidSyntaxException {
+                       throws InvalidSyntaxException {
         String[] symbols = row.split(COLUMN_DELIMETER);
         int numColumns = table.columnCount();
         if (symbols.length != numColumns) {
@@ -126,11 +133,7 @@ public class Parser {
         table.insert(values);
     }
 
-    /** Construct a Table from the contents of a buffered reader.
-     *
-     *  Reference:
-     *  https://docs.oracle.com/javase/tutorial/essential/io/file.html#textfiles
-     */
+    // Reference: https://docs.oracle.com/javase/tutorial/essential/io/file.html#textfiles
     public static Table parseTable(BufferedReader reader)
                         throws IOException, InvalidSyntaxException {
         String line = reader.readLine();

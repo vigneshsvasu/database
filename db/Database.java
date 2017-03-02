@@ -2,6 +2,7 @@ package db;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.regex.Matcher;
 
 public class Database {
     private Map<String, Table> tables;
@@ -11,7 +12,13 @@ public class Database {
     }
 
     public String transact(String query) {
-        Parser.parseQuery(query);
+        Matcher match = Parser.parseQuery(query);
+        if (match == null) {
+            System.out.println("<no match>");
+        }
+        else {
+            System.out.println("Command: " + match.group("command"));
+        }
         return "YOUR CODE HERE";
     }
 }
