@@ -1,9 +1,11 @@
+package db.tests;
+
 import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.io.BufferedReader;
 
-// TODO: remove these imporots
+// TODO: remove these imports
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -50,6 +52,6 @@ public class ParserTest {
     }
 
     public static void main(String args[]) {
-        org.junit.runner.JUnitCore.main("ParserTest");
+        org.junit.runner.JUnitCore.main("db.tests.ParserTest");
     }
 }
