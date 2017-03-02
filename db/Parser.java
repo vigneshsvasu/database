@@ -8,19 +8,22 @@ import java.util.regex.Matcher;
 import java.util.StringJoiner;
 
 public class Parser {
-    private static final String COLUMN_DELIMETER = ",";
+    public static final String COLUMN_DELIMETER = ",";
+    public static final String ROW_DELIMETER = "\n";
 
     private static final String NAME_GROUP = "([a-zA-Z]\\w*)";
     private static final String FILENAME_GROUP = "(.+)";
+    // private static final String
+    private static final String SELECT_CLAUSE = "select\\s+(.+)\\s+from\\s+" + NAME_GROUP + "(\\s+,\\s+" + NAME_GROUP + ")*";
 
     private static final Pattern LOAD_CMD = Pattern.compile("load\\s+" + FILENAME_GROUP);
     private static final Pattern STORE_CMD = Pattern.compile("store\\s+" + FILENAME_GROUP);
-    // private static final
+    private static final Pattern CREATE_CMD = Pattern.compile("create\\s+table\\s+" + NAME_GROUP + "\\s+(as\\s+" + SELECT_CLAUSE + "|\\((" + NAME_GROUP + ")\\s+(int|float|string)\\))");
     private static final Pattern DROP_CMD = Pattern.compile("drop\\s+table\\s+" + NAME_GROUP);
 
     // private static final String SELECT_CMD = ""
 
-    // private static final Pattern CREATE_CMD = Pattern.compile("create\\s+table\\s+" + NAME_GROUP + "\\s+(as\\s+*)")
+    // private static final
 
     private static final Pattern COLUMN_METADATA_PATTERN = Pattern.compile(
                                  NAME_GROUP + "\\s+(int|float|string)");
@@ -49,7 +52,7 @@ public class Parser {
                 columnNames[index] = match.group(1);
                 columnTypes[index] = Type.valueOf(match.group(2).toUpperCase());
             } else {
-                String message = String.format("bad column metadata: \"{0}\"",
+                String message = String.format("bad column metadata: \"%s\"",
                                                metadata);
                 throw new InvalidSyntaxException(message);
             }
@@ -71,7 +74,7 @@ public class Parser {
                 char start = repr.charAt(0);
                 char end = repr.charAt(repr.length() - 1);
                 if (!(start == '\'' && end == '\'')) {
-                    String message = String.format("string value \"{0}\" "
+                    String message = String.format("string value \"%s\" "
                         + "not quoted", repr);
                     throw new InvalidSyntaxException(message);
                 }
@@ -87,7 +90,7 @@ public class Parser {
         String[] symbols = row.split(COLUMN_DELIMETER);
         int numColumns = table.columnCount();
         if (symbols.length != numColumns) {
-            String message = String.format("number of values in row \"{0}\" "
+            String message = String.format("number of values in row \"%s\" "
                 + "does not match number of columns in table", row);
             throw new InvalidSyntaxException(message);
         }

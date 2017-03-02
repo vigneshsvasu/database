@@ -3,6 +3,7 @@ package db;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.StringJoiner;
 
 import db.Value;
 import db.IntValue;
@@ -29,6 +30,20 @@ public class Table implements Iterable<Value[]> {
 
         private Column addTo(Column other) {
             // TOOD
+            return null;
+        }
+    }
+
+    // TODO: implement zip
+    private class LiteralColumn implements Iterable<Value> {
+        private final Value literal;
+
+        private LiteralColumn(Value literal) {
+            this.literal = literal;
+        }
+
+        @Override
+        public Iterator<Value> iterator() {
             return null;
         }
     }
@@ -103,26 +118,32 @@ public class Table implements Iterable<Value[]> {
         }
     }
 
-    public Value[] get(int index){
-        Value[] newArray = new Value[columns.length];
-        for(int i = 0; i < columns.length; i++){
-            Column col = columns[i];
-            newArray[i] = col.values.get(index);
+    public Value[] get(int rowIndex){
+        Value[] row = new Value[columnCount()];
+        for (int columnIndex = 0; columnIndex < row.length; columnIndex++) {
+            row[columnIndex] = columns[columnIndex].values.get(rowIndex);
         }
-        return newArray;
+        return row;
     }
 
     public String toString() {
-        String returnString = " ";
-        for (int i = 0; i < columns[0].values.size(); i++){
-            for (int j = 0; j < columns.length; j++){
-                if (j == columns.length - 1){
-                    returnString += columns[i].values.get(j);
-                }
-            returnString = returnString + columns[i].values.get(j) + ",";
+        StringJoiner rowJoiner = new StringJoiner(Parser.ROW_DELIMETER);
+
+        StringJoiner columnJoiner = new StringJoiner(Parser.COLUMN_DELIMETER);
+        for (Column column : columns) {
+            columnJoiner.add(String.format("%s %s", column.name,
+                             column.type.name().toLowerCase()));
         }
-        returnString = returnString + "\n";
+        rowJoiner.add(columnJoiner.toString());
+
+        for (Value[] row : this) {
+            columnJoiner = new StringJoiner(Parser.COLUMN_DELIMETER);
+            for (Value value : row) {
+                columnJoiner.add(value.toString());
+            }
+            rowJoiner.add(columnJoiner.toString());
         }
-        return returnString;
+
+        return rowJoiner.toString();
     }
 }
