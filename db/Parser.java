@@ -8,32 +8,36 @@ import java.io.IOException;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import java.util.StringJoiner;
 
 public class Parser {
     public static final String COLUMN_DELIMETER = ",";
     public static final String ROW_DELIMETER = "\n";
 
-    private static final String NAME_GROUP = "([a-zA-Z]\\w*)";
-    private static final String TYPE_GROUP = "(int|float|string)";
-    private static final String FILE_PATH_GROUP = "(.+)";
-    private static final String DELIMITED_VALUES_GROUPS = "(.+)(:?\\s*,\\s*(.+))*";
+    private static final String NAME = "([a-zA-Z]\\w*)";
+    private static final String TYPE = "(int|float|string)";
+    private static final String FILE_PATH = "(?<file-path>.+)";
 
-    private static final String SELECT_CLAUSE = "select\\s+(?<columns>.+)\\s+from\\s+(?<tables>.+?)(?:\\s+where\\s+(?<conditions>.+))?";
+    // Command patterns
+    private static final Pattern LOAD_CMD = makeRegex("load\\s+" + FILE_PATH);
+    private static final Pattern STORE_CMD = makeRegex("store\\s+" + FILE_PATH);
+    private static final Pattern SELECT_CMD = makeRegex(
+        "select\\s+(?<columns>.+)\\s+from\\s+(?<tables>.+?)"
+        + "(?:\\s+where\\s+(?<conditions>.+))?");
+    private static final Pattern CREATE_CMD = makeRegex(
+        "create\\s+table\\s+" + NAME
+        + "(?:\\s+\\((?<column-data>.+)\\)|\\s+as\\s+(?<select-clause>.+))");
+    private static final Pattern DROP_CMD = makeRegex("drop\\s+table\\s+" + NAME);
+    private static final Pattern INSERT_CMD = makeRegex(
+        "insert\\s+into\\s+" + NAME + "\\s+values\\s+(?<literals>.+)");
+    private static final Pattern PRINT_CMD = makeRegex("print\\s+" + NAME);
 
-    private static final Pattern SELECT_CMD = Pattern.compile(SELECT_CLAUSE);
+    // Common patterns
+    private static final Pattern COLUMN_METADATA_PATTERN = makeRegex(
+        NAME + "\\s+" + TYPE);
 
-    private static final Pattern LOAD_CMD = Pattern.compile("load\\s+" + FILE_PATH_GROUP);
-    private static final Pattern STORE_CMD = Pattern.compile("store\\s+" + FILE_PATH_GROUP);
-    // private static final Pattern CREATE_CMD = Pattern.compile("create\\s+table\\s+" + NAME_GROUP + "\\s+(as\\s+" + SELECT_CLAUSE + "|\\((" + NAME_GROUP + ")\\s+(int|float|string)\\))");
-    private static final Pattern DROP_CMD = Pattern.compile("drop\\s+table\\s+" + NAME_GROUP);
-
-    // private static final String SELECT_CMD = ""
-
-    // private static final
-
-    private static final Pattern COLUMN_METADATA_PATTERN = Pattern.compile(
-                                 NAME_GROUP + "\\s+" + TYPE_GROUP);
+    private static Pattern makeRegex(String baseExpr) {
+        return Pattern.compile("^\\s*" + baseExpr + "\\s*$");
+    }
 
     public static class InvalidSyntaxException extends Exception {
         private InvalidSyntaxException(String message) {
@@ -46,6 +50,9 @@ public class Parser {
     }
 
     // TODO: trim strings
+
+    public void parseQuery(String query) {
+    }
 
     public static Table constructEmptyTable(String[] columnMetadata)
                         throws InvalidSyntaxException {
@@ -153,7 +160,7 @@ public class Parser {
             assertTrue(match.matches());
             assertEquals("x , y,z", match.group("columns"));
             assertEquals("w", match.group("tables"));
-            assertEquals("u  >0", match.group("conditions"));
+            assertEquals("u>0", match.group("conditions"));
         }
     }
 }

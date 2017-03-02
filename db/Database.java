@@ -11,6 +11,7 @@ public class Database {
     }
 
     public String transact(String query) {
+        Parser.parseQuery(query);
         return "YOUR CODE HERE";
     }
 }
