@@ -61,6 +61,11 @@ public class Parser {
         return null;
     }
 
+    public static String extractTableName(String path) {
+        String[] components = path.split("/");
+        return components[components.length - 1];
+    }
+
     public static Table constructEmptyTable(String[] columnMetadata)
                         throws InvalidSyntaxException {
         int numColumns = columnMetadata.length;

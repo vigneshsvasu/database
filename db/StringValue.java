@@ -12,6 +12,11 @@ public class StringValue implements Value {
     }
 
     @Override
+    public boolean equals(Object other) {
+        return ((StringValue) other).value.toString().equals(toString());
+    }
+
+    @Override
     public String toString() {
         return '\'' + String.valueOf(value) + '\'';
     }

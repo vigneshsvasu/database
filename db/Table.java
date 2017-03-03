@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.StringJoiner;
+import java.util.Map;
+import java.util.HashMap;
 
 import db.Value;
 import db.IntValue;
@@ -21,6 +23,26 @@ public class Table implements Iterable<Value[]> {
             this.name = name;
             this.type = type;
             values = new ArrayList<>();
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof Column)) {
+                return false;
+            }
+            Column otherAsColumn = (Column) other;
+            return name.equals(otherAsColumn.name)
+                && type.equals(otherAsColumn.type);
+        }
+
+        @Override
+        public int hashCode() {
+            return name.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return String.format("<Column '%s'>", name);
         }
 
         @Override
@@ -80,13 +102,24 @@ public class Table implements Iterable<Value[]> {
     }
 
     private final Column[] columns;
+    private final Map<String, Column> columnLookupTable;
 
     public Table(String[] names, Type[] types) {
         assert names.length == types.length;
         columns = new Column[names.length];
+        columnLookupTable = new HashMap<>();
 
         for (int index = 0; index < columns.length; index++) {
             columns[index] = new Column(names[index], types[index]);
+            columnLookupTable.put(names[index], columns[index]);
+        }
+    }
+
+    private Table(Column[] columns) {
+        this.columns = columns;
+        columnLookupTable = new HashMap<>();
+        for (Column column : columns) {
+            columnLookupTable.put(column.name, column);
         }
     }
 
@@ -109,6 +142,15 @@ public class Table implements Iterable<Value[]> {
 
     public Type getType(int index) {
         return columns[index].type;
+    }
+
+    private int indexOf(String name) {
+        for (int index = 0; index < columns.length; index++) {
+            if (columns[index].name.equals(name)) {
+                return index;
+            }
+        }
+        return -1;
     }
 
     public void insert(Value[] row) {
@@ -145,5 +187,99 @@ public class Table implements Iterable<Value[]> {
         }
 
         return rowJoiner.toString();
+    }
+
+    private List<Column> findCommonColumns(Table other) {
+        List<Column> commonColumns = new ArrayList<>();
+        for (Column column : columns) {
+            for (Column otherColumn : other.columns) {
+                if (column.name.equals(otherColumn.name)) {
+                    if (column.type != otherColumn.type) {
+                        // TODO: throw an exception
+                    }
+                    commonColumns.add(new Column(column.name, column.type));
+                }
+            }
+        }
+        return commonColumns;
+    }
+
+    private Table constructEmptyJoinedTable(Table other,
+            List<Column> commonColumns) {
+        List<Column> newColumns = new ArrayList<>(commonColumns);
+
+        for (Column column : columns) {
+            if (!newColumns.contains(column)) {
+                newColumns.add(new Column(column.name, column.type));
+            }
+        }
+
+        for (Column otherColumn : other.columns) {
+            if (!newColumns.contains(otherColumn)) {
+                newColumns.add(new Column(otherColumn.name, otherColumn.type));
+            }
+        }
+
+        Column[] newColumnsAsArray = new Column[newColumns.size()];
+        for (int index = 0; index < newColumns.size(); index++) {
+            newColumnsAsArray[index] = newColumns.get(index);
+        }
+        return new Table(newColumnsAsArray);
+    }
+
+    private boolean shouldJoin(Value[] row, Value[] otherRow,
+            List<Integer> indices, List<Integer> otherIndices) {
+        for (int index = 0; index < indices.size(); index++) {
+            if (!row[indices.get(index)].equals(otherRow[otherIndices.get(index)])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void populateJoinedTable(Table result, Table other,
+                                     List<Column> commonColumns) {
+        List<Integer> indices = new ArrayList<>(commonColumns.size());
+        List<Integer> otherIndices = new ArrayList<>(commonColumns.size());
+        for (int index = 0; index < commonColumns.size(); index++) {
+            Column column = commonColumns.get(index);
+            indices.add(indexOf(column.name));
+            otherIndices.add(other.indexOf(column.name));
+        }
+
+        for (Value[] row : this) {
+            for (Value[] otherRow : other) {
+                if (shouldJoin(row, otherRow, indices, otherIndices)) {
+                    Value[] newRow = new Value[result.columnCount()];
+                    int runningIndex = 0;
+
+                    for (int index : indices) {
+                        newRow[runningIndex++] = row[index];  // TODO: cloning?
+                    }
+
+                    for (int index = 0; index < columns.length; index++) {
+                        if (!indices.contains(index)) {
+                            newRow[runningIndex++] = row[index];
+                        }
+                    }
+
+                    for (int index = 0; index < other.columns.length; index++) {
+                        if (!otherIndices.contains(index)) {
+                            newRow[runningIndex++] = otherRow[index];
+                        }
+                    }
+
+                    assert runningIndex == newRow.length;
+                    result.insert(newRow);
+                }
+            }
+        }
+    }
+
+    public Table join(Table other) {
+        List<Column> commonColumns = findCommonColumns(other);
+        Table result = constructEmptyJoinedTable(other, commonColumns);
+        populateJoinedTable(result, other, commonColumns);
+        return result;
     }
 }

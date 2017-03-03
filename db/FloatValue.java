@@ -2,6 +2,7 @@ package db;
 
 public class FloatValue implements Value {
     private static final double PRECISION = 1e-3;
+    private static final double TOLERANCE = 1e-12;
 
     private final double value;
 
@@ -12,6 +13,11 @@ public class FloatValue implements Value {
     @Override
     public String toString() {
         return String.format("%.3f", value);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return Math.abs(((FloatValue) other).value - value) < TOLERANCE;
     }
 
     public double getValue() {

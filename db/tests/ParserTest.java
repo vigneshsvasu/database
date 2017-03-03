@@ -21,13 +21,11 @@ public class ParserTest {
         // TODO: replace with `FileIO`
         Table table = null;
         try {
-            FileReader fileReader = new FileReader(new File("examples/teams.tbl"));
-            BufferedReader reader = new BufferedReader(fileReader);
-            table = Parser.parseTable(reader);
+            table = Parser.parseTable(db.FileIO.read("examples/teams"));
         } catch (IOException e) {
-            System.out.println(e);
+            e.printStackTrace();
         } catch (db.Parser.InvalidSyntaxException e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
 
         assertNotEquals(table, null);

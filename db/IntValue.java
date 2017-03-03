@@ -12,6 +12,11 @@ public class IntValue implements Value {
         return Integer.toString(value);
     }
 
+    @Override
+    public boolean equals(Object other) {
+        return ((IntValue) other).value == value;
+    }
+
     public int getValue() {
         return value;
     }
