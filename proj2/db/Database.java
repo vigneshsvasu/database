@@ -89,10 +89,17 @@ public class Database {
                 case "select":
                     Table result = select(match.group("columns"),
                         match.group("tables"), match.group("conditions"));
+                    if (result == null) {
+                        return "No such table";
+                    }
                     return result.toString();
 
                 case "print":
-                    return getTable(match.group(2)).toString();
+                    result = getTable(match.group(2));
+                    if (result == null) {
+                        return "No such table";
+                    }
+                    return result.toString();
             }
         }
         else {
