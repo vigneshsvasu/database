@@ -69,7 +69,7 @@ public class Database {
                         loadTable(path);
                     }
                     catch (IOException e) {
-                        return String.format("Failed to read from file \"%s.tbl\"", path);
+                        return String.format("ERROR: Failed to read from file \"%s.tbl\"", path);
                     }
                     catch (Parser.InvalidSyntaxException e) {
                         return e.toString();
@@ -82,7 +82,7 @@ public class Database {
                         storeTable(path);
                     }
                     catch (IOException e) {
-                        return String.format("Failed to write to file \"%s\"", path);
+                        return String.format("ERROR: Failed to write to file \"%s\"", path);
                     }
                     break;
 
@@ -90,20 +90,20 @@ public class Database {
                     Table result = select(match.group("columns"),
                         match.group("tables"), match.group("conditions"));
                     if (result == null) {
-                        return "No such table";
+                        return "ERROR: No such table";
                     }
                     return result.toString();
 
                 case "print":
                     result = getTable(match.group(2));
                     if (result == null) {
-                        return "No such table";
+                        return "ERROR: No such table";
                     }
                     return result.toString();
             }
         }
         else {
-            return "No such command";
+            return "ERROR: No such command";
         }
 
         return "";

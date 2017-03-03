@@ -13,7 +13,7 @@ public class StringValue implements Value {
 
     @Override
     public boolean equals(Object other) {
-        return ((StringValue) other).value.toString().equals(toString());
+        return other.toString().equals(toString());
     }
 
     @Override
