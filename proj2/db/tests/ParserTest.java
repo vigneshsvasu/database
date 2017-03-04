@@ -3,6 +3,8 @@ package db.tests;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
+import java.util.regex.Matcher;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 
@@ -14,6 +16,26 @@ import db.FileIO;
 import db.DatabaseException;
 
 public class ParserTest {
+    @Test
+    public void testSelectCommandMatching() {
+        Matcher match;
+
+        match = Parser.parseQuery("select x from y");
+        assertNotEquals(null, match);
+        assertEquals("select", match.group("command"));
+        assertEquals("x", match.group(2));
+        assertEquals("y", match.group(3));
+        assertEquals(null, match.group(4));  // No conditions
+
+        match = Parser.parseQuery(
+            "\tselect \t x , y,z from  w where u>0 and v<  w  ");
+        assertNotEquals(null, match);
+        assertEquals("select", match.group("command"));
+        assertEquals("x , y,z", match.group("columns"));
+        assertEquals("w", match.group("tables"));
+        assertEquals("u>0 and v<  w", match.group("conditions"));
+    }
+
     @Test
     public void testEmptyTableConstruction() throws IOException, DatabaseException {
         Table table = Parser.parseTable(FileIO.read("examples/teams.tbl"));

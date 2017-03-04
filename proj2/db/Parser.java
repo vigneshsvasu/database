@@ -1,8 +1,5 @@
 package db;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 
@@ -27,7 +24,7 @@ public class Parser {
     private static final Pattern DROP_CMD = makeCommand("drop", "table\\s+" + NAME);
     private static final Pattern SELECT_CMD = makeCommand("select",
         "(?<columns>.+)\\s+from\\s+(?<tables>.+?)"
-        + "(?:\\s+where\\s+(?<conditions>.+))?");
+        + "(?:\\s+where\\s+(?<conditions>.+?))?");
     private static final Pattern INSERT_CMD = makeCommand("insert",
         "into\\s+" + NAME + "\\s+values\\s+\\((?<literals>.+)\\)");
     private static final Pattern PRINT_CMD = makeCommand("print", NAME);
@@ -161,24 +158,5 @@ public class Parser {
             populateRow(table, line);
         }
         return table;
-    }
-
-    public static class ParserInternalTest {
-        @Test
-        public void testSelectClauseMatching() {
-            Matcher match = null;
-
-            match = SELECT_CMD.matcher("select x from y");
-            assertTrue(match.matches());
-            assertEquals("x", match.group(1));
-            assertEquals("y", match.group(2));
-            assertEquals(null, match.group(3));
-
-            match = SELECT_CMD.matcher("select \t x , y,z  from  w where u>0");
-            assertTrue(match.matches());
-            assertEquals("x , y,z", match.group("columns"));
-            assertEquals("w", match.group("tables"));
-            assertEquals("u>0", match.group("conditions"));
-        }
     }
 }
