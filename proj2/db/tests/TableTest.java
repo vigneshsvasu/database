@@ -40,8 +40,4 @@ public class TableTest {
         assertEquals(2, t9.rowCount());
         assertEquals(5, t9.columnCount());
     }
-
-    public static void main(String args[]) {
-        org.junit.runner.JUnitCore.main("db.tests.TableTest");
-    }
 }

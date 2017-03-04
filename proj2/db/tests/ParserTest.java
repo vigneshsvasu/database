@@ -60,8 +60,4 @@ public class ParserTest {
             index++;
         }
     }
-
-    public static void main(String args[]) {
-        org.junit.runner.JUnitCore.main("db.tests.ParserTest");
-    }
 }

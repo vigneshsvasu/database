@@ -2,3 +2,4 @@
 
 * [Data structure design](design.md)
 * [Database API](API.md)
+* [Project to-do list](todo.md)
