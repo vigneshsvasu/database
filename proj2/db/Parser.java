@@ -20,7 +20,7 @@ public class Parser {
     private static final Pattern LOAD_CMD = makeCommand("load", FILE_PATH);
     private static final Pattern STORE_CMD = makeCommand("store", FILE_PATH);
     private static final Pattern CREATE_CMD = makeCommand("create",
-        "table\\s+" + NAME + "(?:\\s+\\((?<columns>.+)\\)|\\s+as\\s+(?<select>.+))");
+        "table\\s+" + NAME + "(?:\\s+\\((?<columns>.+)\\)|\\s+as\\s+(?<select>.+?))");
     private static final Pattern DROP_CMD = makeCommand("drop", "table\\s+" + NAME);
     private static final Pattern SELECT_CMD = makeCommand("select",
         "(?<columns>.+)\\s+from\\s+(?<tables>.+?)"

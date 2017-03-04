@@ -27,6 +27,14 @@ public class ParserTest {
     }
 
     @Test
+    public void testCaseSensitivity() {
+        Matcher match = Parser.parseQuery("CREATE TABLE example (x int)");
+        assertEquals(null, match);
+        match = Parser.parseQuery("Create table example (y int)");
+        assertEquals(null, match);
+    }
+
+    @Test
     public void testLoadCommandMatching() {
         Matcher match = Parser.parseQuery(" load \t  _dir/example_table__ \t");
         assertNotEquals(null, match);
@@ -40,6 +48,23 @@ public class ParserTest {
         assertNotEquals(null, match);
         assertEquals("store", match.group(1));
         assertEquals("Example__Table", match.group(2));
+    }
+
+    @Test
+    public void testCreateCommandMatching() {
+        Matcher match = Parser.parseQuery(
+            "  create\t  table example  (x int,   y string)\t");
+        assertNotEquals(null, match);
+        assertEquals("create", match.group("command"));
+        assertEquals("example", match.group(2));
+        assertEquals("x int,   y string", match.group("columns"));
+
+        match = Parser.parseQuery(
+            "\tcreate table  example\t as select\t* from  illegal-example ");
+        assertNotEquals(null, match);
+        //  This illegal table name should be allowed because it will be caught
+        //  when parsing the select statement, which does not concern `create`.
+        assertEquals("select\t* from  illegal-example", match.group("select"));
     }
 
     @Test
