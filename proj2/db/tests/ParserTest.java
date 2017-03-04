@@ -17,6 +17,32 @@ import db.DatabaseException;
 
 public class ParserTest {
     @Test
+    public void testIllegalTableNames() {
+        Matcher match = Parser.parseQuery("load dir/_illegal_table");
+        assertEquals(null, match);
+        match = Parser.parseQuery("store table.tbl");
+        assertEquals(null, match);
+        match = Parser.parseQuery("insert into 3table values (5, 5)");
+        assertEquals(null, match);
+    }
+
+    @Test
+    public void testLoadCommandMatching() {
+        Matcher match = Parser.parseQuery(" load \t  _dir/example_table__ \t");
+        assertNotEquals(null, match);
+        assertEquals("load", match.group("command"));
+        assertEquals("_dir/example_table__", match.group(2));
+    }
+
+    @Test
+    public void testStoreCommandMatching() {
+        Matcher match = Parser.parseQuery("  store\t\t  Example__Table\t  ");
+        assertNotEquals(null, match);
+        assertEquals("store", match.group(1));
+        assertEquals("Example__Table", match.group(2));
+    }
+
+    @Test
     public void testSelectCommandMatching() {
         Matcher match;
 

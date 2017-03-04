@@ -14,7 +14,7 @@ public class Parser {
 
     private static final String NAME = "([a-zA-Z]\\w*)";
     private static final String TYPE = "(int|float|string)";
-    private static final String FILE_PATH = "(?<file>.+)";
+    private static final String FILE_PATH = "(?<path>(.+\\/)*" + NAME + ")";
 
     // Command patterns
     private static final Pattern LOAD_CMD = makeCommand("load", FILE_PATH);

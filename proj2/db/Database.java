@@ -47,7 +47,7 @@ public class Database {
     }
 
     private String loadTable(Matcher match) throws DatabaseException {
-        String pathWithoutExt = match.group(2);
+        String pathWithoutExt = match.group("path");
         String path = FileIO.addExtension(pathWithoutExt);
         String name = Parser.extractTableName(pathWithoutExt);
 
@@ -66,7 +66,7 @@ public class Database {
     }
 
     private String storeTable(Matcher match) throws DatabaseException {
-        String pathWithoutExt = match.group(2);
+        String pathWithoutExt = match.group("path");
         String path = FileIO.addExtension(pathWithoutExt);
         String name = Parser.extractTableName(pathWithoutExt);
 
