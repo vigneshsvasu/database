@@ -27,8 +27,8 @@ public class TableTest {
         // An example from Lab 5
         Table t7 = null, t8 = null;
         try {
-            t7 = parseTable(db.FileIO.read("examples/t7"));
-            t8 = parseTable(db.FileIO.read("examples/t8"));
+            t7 = parseTable(db.FileIO.read("examples/t7.tbl"));
+            t8 = parseTable(db.FileIO.read("examples/t8.tbl"));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -36,7 +36,9 @@ public class TableTest {
         }
 
         Table t9 = t7.join(t8);
-        System.out.println(t9);
+
+        assertEquals(2, t9.rowCount());
+        assertEquals(5, t9.columnCount());
     }
 
     public static void main(String args[]) {

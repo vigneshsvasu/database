@@ -5,107 +5,148 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 
 import java.io.IOException;
+import java.io.FileNotFoundException;
+
+import static db.DatabaseException.InvalidSyntaxException;
+import static db.DatabaseException.NoSuchTableException;
+import static db.DatabaseException.TableAlreadyExistsException;
 
 public class Database {
-    private Map<String, Table> tables;
+    private final Map<String, Table> tables;
 
     public Database() {
         tables = new HashMap<>();
     }
 
-    private Table getTable(String name) {
+    private Table getTable(String name) throws NoSuchTableException {
         if (!tables.containsKey(name)) {
-            // TODO: throw exception
+            throw new NoSuchTableException(name);
         }
         return tables.get(name);
     }
 
-    private void loadTable(String path) throws IOException, Parser.InvalidSyntaxException {
-        String tableName = Parser.extractTableName(path);
-        Table table = Parser.parseTable(FileIO.read(path));
-        if (tables.containsKey(tableName)) {
-            return;  // TODO: throw exception
+    private void putTable(String name, Table table)
+                 throws TableAlreadyExistsException {
+        if (tables.containsKey(name)) {
+            throw new TableAlreadyExistsException(name);
         }
-        tables.put(tableName, table);
+        tables.put(name, table);
     }
 
-    private void storeTable(String path) throws IOException {
-        String tableName = Parser.extractTableName(path);
-        Table table = getTable(tableName);
-        FileIO.write(path, table.toString() + "\n");
+    private Table select(String query) throws DatabaseException {
+        Matcher match = Parser.parseQuery(query);
+        if (!(match != null && match.group("command").equals("select"))) {
+            throw new DatabaseException("malformed query");
+        }
+        return select(match);
     }
 
-    private Table select(String columnExprs, String tableNames, String conditions) {
-        // TODO: fix this
-        Table aggregate = null, current = null;
+    private Table select(Matcher match) {
+        // TODO: implement this
+        return null;
+    }
 
-        for (String tableName : tableNames.split(",")) {
-            tableName = tableName.trim();
-            if (!tables.containsKey(tableName)) {
-                return null;  // TODO: throw exception
-            }
+    private String loadTable(Matcher match) throws DatabaseException {
+        String pathWithoutExt = match.group(2);
+        String path = FileIO.addExtension(pathWithoutExt);
+        String name = Parser.extractTableName(pathWithoutExt);
 
-            current = tables.get(tableName);
-
-            if (aggregate == null) {
-                aggregate = current;
-            }
-            else {
-                aggregate = aggregate.join(current);
-            }
+        Table table = null;
+        try {
+            table = Parser.parseTable(FileIO.read(path));
+        } catch (FileNotFoundException exc) {
+            throw new DatabaseException(
+                String.format("failed to read file \"%s\"", path));
+        } catch (IOException exc) {
+            throw new DatabaseException(exc.getMessage());
         }
 
-        return aggregate;
+        putTable(name, table);
+        return "";
+    }
+
+    private String storeTable(Matcher match) throws DatabaseException {
+        String pathWithoutExt = match.group(2);
+        String path = FileIO.addExtension(pathWithoutExt);
+        String name = Parser.extractTableName(pathWithoutExt);
+
+        Table table = getTable(name);
+        try {
+            FileIO.write(path, table.toString().trim() + "\n");  // TODO: fix?
+        } catch (IOException exc) {
+            throw new DatabaseException(exc.getMessage());
+        }
+
+        return "";
+    }
+
+    private String createTable(Matcher match) throws DatabaseException {
+        String name = match.group(2), columns = match.group("columns");
+        Table table;
+        if (columns != null) {
+            table = Parser.constructEmptyTable(columns);
+        } else {
+            String subquery = match.group("select");
+            table = select(subquery);
+        }
+        putTable(name, table);
+        return "";
+    }
+
+    private String dropTable(Matcher match) throws NoSuchTableException {
+        String tableName = match.group(2);
+        if (!tables.containsKey(tableName)) {
+            throw new NoSuchTableException(tableName);
+        }
+        tables.remove(tableName);
+        return "";
+    }
+
+    private String selectTable(Matcher match) {
+        Table table = select(match);
+        return table.toString();
+    }
+
+    private String insertIntoTable(Matcher match) throws DatabaseException {
+        Table table = getTable(match.group(2));
+        Parser.populateRow(table, match.group("literals"));
+        return "";
+    }
+
+    private String printTable(Matcher match) throws NoSuchTableException {
+        Table table = getTable(match.group(2));
+        return table.toString();
     }
 
     public String transact(String query) {
         Matcher match = Parser.parseQuery(query);
 
-        if (match != null) {
+        try {
+            if (match == null) {
+                throw new DatabaseException("malformed query");
+            }
+
+            // Dispatch by action
             switch (match.group("command")) {
                 case "load":
-                    String path = match.group(2);
-                    try {
-                        loadTable(path);
-                    }
-                    catch (IOException e) {
-                        return String.format("ERROR: Failed to read from file \"%s.tbl\"", path);
-                    }
-                    catch (Parser.InvalidSyntaxException e) {
-                        return e.toString();
-                    }
-                    break;
-
+                    return loadTable(match);
                 case "store":
-                    path = match.group(2);
-                    try {
-                        storeTable(path);
-                    }
-                    catch (IOException e) {
-                        return String.format("ERROR: Failed to write to file \"%s\"", path);
-                    }
-                    break;
-
+                    return storeTable(match);
+                case "create":
+                    return createTable(match);
+                case "drop":
+                    return dropTable(match);
                 case "select":
-                    Table result = select(match.group("columns"),
-                        match.group("tables"), match.group("conditions"));
-                    if (result == null) {
-                        return "ERROR: No such table";
-                    }
-                    return result.toString();
-
+                    return selectTable(match);
+                case "insert":
+                    return insertIntoTable(match);
                 case "print":
-                    result = getTable(match.group(2));
-                    if (result == null) {
-                        return "ERROR: No such table";
-                    }
-                    return result.toString();
+                    return printTable(match);
+                default:
+                    throw new DatabaseException("no such command");
             }
+        } catch (DatabaseException exc) {
+            return exc.getMessage();
         }
-        else {
-            return "ERROR: No such command";
-        }
-
-        return "";
     }
 }

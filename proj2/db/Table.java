@@ -7,12 +7,6 @@ import java.util.StringJoiner;
 import java.util.Map;
 import java.util.HashMap;
 
-import db.Value;
-import db.IntValue;
-import db.FloatValue;
-import db.StringValue;
-import db.MagicValue;
-
 public class Table implements Iterable<Value[]> {
     private class Column implements Iterable<Value> {
         private final String name;

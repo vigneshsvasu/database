@@ -4,29 +4,19 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.io.BufferedReader;
-
-// TODO: remove these imports
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 
 import db.Parser;
 import db.Table;
 import db.Type;
 import db.Value;
+import db.FileIO;
+import db.DatabaseException;
 
 public class ParserTest {
     @Test
-    public void testEmptyTableConstruction() {
-        // TODO: replace with `FileIO`
-        Table table = null;
-        try {
-            table = Parser.parseTable(db.FileIO.read("examples/teams"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (db.Parser.InvalidSyntaxException e) {
-            e.printStackTrace();
-        }
+    public void testEmptyTableConstruction() throws IOException, DatabaseException {
+        Table table = Parser.parseTable(FileIO.read("examples/teams.tbl"));
 
         assertNotEquals(table, null);
         assertTrue(table instanceof Table);

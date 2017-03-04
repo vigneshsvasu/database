@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import static db.DatabaseException.InvalidSyntaxException;
+
 public class Parser {
     public static final String COLUMN_DELIMETER = ",";
     public static final String ROW_DELIMETER = "\n";
@@ -27,7 +29,7 @@ public class Parser {
         "(?<columns>.+)\\s+from\\s+(?<tables>.+?)"
         + "(?:\\s+where\\s+(?<conditions>.+))?");
     private static final Pattern INSERT_CMD = makeCommand("insert",
-        "into\\s+" + NAME + "\\s+values\\s+(?<literals>.+)");
+        "into\\s+" + NAME + "\\s+values\\s+\\((?<literals>.+)\\)");
     private static final Pattern PRINT_CMD = makeCommand("print", NAME);
     private static final Pattern[] COMMANDS = {LOAD_CMD, STORE_CMD, CREATE_CMD,
         DROP_CMD, SELECT_CMD, INSERT_CMD, PRINT_CMD};
@@ -42,12 +44,6 @@ public class Parser {
 
     private static Pattern makeCommand(String name, String rest) {
         return makeRegex("(?<command>" + name + ")\\s+" + rest);
-    }
-
-    public static class InvalidSyntaxException extends Exception {
-        private InvalidSyntaxException(String message) {
-            super(message);
-        }
     }
 
     public static Matcher parseQuery(String query) {
@@ -89,6 +85,11 @@ public class Parser {
         return new Table(columnNames, columnTypes);
     }
 
+    public static Table constructEmptyTable(String columnMetadata)
+                        throws InvalidSyntaxException {
+        return constructEmptyTable(columnMetadata.split(COLUMN_DELIMETER));
+    }
+
     private static Value parseValue(String repr, Type type)
                          throws InvalidSyntaxException {
         switch (type) {
@@ -102,8 +103,8 @@ public class Parser {
                 char start = repr.charAt(0);
                 char end = repr.charAt(repr.length() - 1);
                 if (!(start == '\'' && end == '\'')) {
-                    String message = String.format("string value \"%s\" "
-                        + "not quoted", repr);
+                    String message = String.format(
+                      "string value \"%s\" not singly-quoted", repr);
                     throw new InvalidSyntaxException(message);
                 }
                 return new StringValue(repr.substring(1, repr.length() - 1));
@@ -114,7 +115,7 @@ public class Parser {
     }
 
     public static void populateRow(Table table, String row)
-                       throws InvalidSyntaxException {
+                       throws DatabaseException {
         String[] symbols = row.split(COLUMN_DELIMETER);
         int numColumns = table.columnCount();
         if (symbols.length != numColumns) {
@@ -126,27 +127,36 @@ public class Parser {
         Value[] values = new Value[numColumns];
         for (int index = 0; index < numColumns; index++) {
             String symbol = symbols[index].trim();
+            Type type = table.getType(index);
+
             if (MagicValue.NAN.equals(symbol)) {
+                if (type == Type.STRING) {
+                    throw new DatabaseException(
+                        "cannot store NAN in column of type \"string\"");
+                }
                 values[index] = MagicValue.NAN;
             } else if (MagicValue.NOVALUE.equals(symbol)) {
                 values[index] = MagicValue.NOVALUE;
             } else {
-                values[index] = parseValue(symbol, table.getType(index));
+                try {
+                    values[index] = parseValue(symbol, type);
+                } catch (NumberFormatException exc) {
+                    throw new DatabaseException(String.format(
+                        "malformed numeric literal \"%s\"", symbol));
+                }
             }
         }
 
         table.insert(values);
     }
 
-    // Reference: https://docs.oracle.com/javase/tutorial/essential/io/file.html#textfiles
     public static Table parseTable(BufferedReader reader)
-                        throws IOException, InvalidSyntaxException {
+                        throws IOException, DatabaseException {
         String line = reader.readLine();
         if (line == null) {
             throw new InvalidSyntaxException("empty table file");
         }
-        String[] columnMetadata = line.split(COLUMN_DELIMETER);
-        Table table = constructEmptyTable(columnMetadata);
+        Table table = constructEmptyTable(line);
         while ((line = reader.readLine()) != null) {
             populateRow(table, line);
         }
