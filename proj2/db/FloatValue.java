@@ -20,7 +20,7 @@ public class FloatValue implements Value {
         return Math.abs(((FloatValue) other).value - value) < TOLERANCE;
     }
 
-    public double getValue() {
+    public Object getValue() {
         return value;
     }
 }

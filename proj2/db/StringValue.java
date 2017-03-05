@@ -20,4 +20,8 @@ public class StringValue implements Value {
     public String toString() {
         return '\'' + String.valueOf(value) + '\'';
     }
+
+    public String getValue(){
+        return null;
+    }
 }

@@ -17,7 +17,7 @@ public class IntValue implements Value {
         return ((IntValue) other).value == value;
     }
 
-    public int getValue() {
+    public Object getValue() {
         return value;
     }
 }

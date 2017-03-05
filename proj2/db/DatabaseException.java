@@ -43,6 +43,15 @@ public class DatabaseException extends Exception {
         }
     }
 
+    public static class IncompatibleTypeException extends DatabaseException {
+        private final String tableName;
+
+        public IncompatibleTypeException(String tableName){
+            super(String.format("Operand is incompatible with column type.", tableName));
+            this.tableName = tableName;
+        }
+    }
+
     public static class NoSuchTableException extends DatabaseException {
         private final String tableName;
 

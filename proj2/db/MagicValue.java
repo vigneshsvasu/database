@@ -27,4 +27,8 @@ public class MagicValue implements Value {
     public boolean equals(Object other) {
         return repr.equals(other.toString());
     }
+
+    public Value getValue(){
+        return null;
+    }
 }
