@@ -73,12 +73,17 @@ public class TableTest {
     @Test
     public void testJoin() throws IOException, DatabaseException {
         // An example from Lab 5
-        Table t7 = parseTable(db.FileIO.read("examples/t7.tbl"));
-        Table t8 = parseTable(db.FileIO.read("examples/t8.tbl"));
+        Table t7 = parseTable(FileIO.read("examples/t7.tbl"));
+        Table t8 = parseTable(FileIO.read("examples/t8.tbl"));
         Table t9 = t7.join(t8);
 
         assertEquals(2, t9.rowCount());
         assertEquals(5, t9.columnCount());
+
+        String[] names = new String[] {"z", "w", "x", "y", "b"};
+        for (int index = 0; index < t9.columnCount(); index++) {
+            assertEquals(names[index], t9.getName(index));
+        }
 
         int[][] expected = {
             {4, 1, 7, 7, 7},
@@ -93,6 +98,20 @@ public class TableTest {
             }
         }
 
-        // No columns in common: the Cartesian product
+        // No columns in common
+        Table t4 = parseTable(FileIO.read("examples/t4.tbl"));
+        Table cartesianProduct = t4.join(t7);
+        assertEquals(t4.columnCount() + t7.columnCount(),
+                     cartesianProduct.columnCount());
+        assertEquals(t4.rowCount() * t7.rowCount(),
+                     cartesianProduct.rowCount());
+
+        // No values in common columns
+        Table dummy = new Table(new String[] {"a", "x"},
+                                new Type[] {Type.INT, Type.INT});
+        dummy.insert(new Value[] {new IntValue(9), MagicValue.NAN});
+        Table noCommonValues = dummy.join(t4);
+        assertEquals(3, noCommonValues.columnCount());
+        assertEquals(0, noCommonValues.rowCount());
     }
 }
