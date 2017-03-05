@@ -154,7 +154,7 @@ public class Table implements Iterable<Value[]> {
         }
     }
 
-    public Value[] get(int rowIndex){
+    public Value[] getRow(int rowIndex){
         Value[] row = new Value[columnCount()];
         for (int columnIndex = 0; columnIndex < row.length; columnIndex++) {
             row[columnIndex] = columns[columnIndex].values.get(rowIndex);
