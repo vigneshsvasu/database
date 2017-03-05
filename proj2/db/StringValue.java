@@ -1,6 +1,6 @@
 package db;
 
-public class StringValue implements Value {
+public class StringValue implements Value<String> {
     private final char[] value;
 
     public StringValue(char[] value) {
@@ -22,6 +22,7 @@ public class StringValue implements Value {
     }
 
     public String getValue(){
-        return null;
+        String result = new String(value);
+        return result;
     }
 }

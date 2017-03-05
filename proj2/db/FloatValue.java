@@ -1,6 +1,6 @@
 package db;
 
-public class FloatValue implements Value {
+public class FloatValue implements Value<Double> {
     private static final double PRECISION = 1e-3;
     private static final double TOLERANCE = 1e-12;
 
@@ -20,7 +20,7 @@ public class FloatValue implements Value {
         return Math.abs(((FloatValue) other).value - value) < TOLERANCE;
     }
 
-    public Object getValue() {
+    public Double getValue() {
         return value;
     }
 }

@@ -1,6 +1,6 @@
 package db;
 
-public class IntValue implements Value {
+public class IntValue implements Value<Integer> {
     private final int value;
 
     public IntValue(int value) {
@@ -17,7 +17,7 @@ public class IntValue implements Value {
         return ((IntValue) other).value == value;
     }
 
-    public Object getValue() {
+    public Integer getValue() {
         return value;
     }
 }

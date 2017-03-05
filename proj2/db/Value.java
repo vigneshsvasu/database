@@ -1,5 +1,5 @@
 package db;
 
-public interface Value {
-    Object getValue();
+public interface Value<T> {
+    T getValue();
 }
