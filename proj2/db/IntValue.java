@@ -17,6 +17,7 @@ public class IntValue implements Value<Integer> {
         return ((IntValue) other).value == value;
     }
 
+    @Override
     public Integer getValue() {
         return value;
     }

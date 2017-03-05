@@ -20,6 +20,7 @@ public class FloatValue implements Value<Double> {
         return Math.abs(((FloatValue) other).value - value) < TOLERANCE;
     }
 
+    @Override
     public Double getValue() {
         return value;
     }

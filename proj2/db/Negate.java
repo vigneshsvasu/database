@@ -6,14 +6,14 @@ package db;
 public class Negate implements UnaryColumnExpression {
     public FloatValue apply(FloatValue x){
         FloatValue changedVal;
-        double val = x.getValue();
+        Double val = x.getValue();
         val = -val;
         changedVal = new FloatValue(val);
         return changedVal;
     }
     public IntValue apply(IntValue x){
         IntValue changedVal;
-        int val = x.getValue();
+        Integer val = x.getValue();
         val = -val;
         changedVal = new IntValue(val);
         return changedVal;
