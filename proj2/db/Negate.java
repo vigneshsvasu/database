@@ -4,9 +4,6 @@ package db;
  * Created by vigneshvasu on 3/5/17.
  */
 public class Negate implements UnaryColumnExpression {
-    public Value apply(Value x){
-        return null;
-    }
     public FloatValue apply(FloatValue x){
         FloatValue changedVal;
         double val = x.getValue();
