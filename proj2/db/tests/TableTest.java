@@ -3,23 +3,57 @@ package db.tests;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
+import java.io.IOException;
+
 import static db.Parser.parseTable;
+import db.DatabaseException;
 import db.Table;
 import db.Type;
 import db.Value;
 import db.IntValue;
 import db.FloatValue;
 import db.StringValue;
+import db.MagicValue;
+import db.FileIO;
 
 public class TableTest {
     @Test
+    public void testRowIteration() throws IOException, DatabaseException {
+        Table table = parseTable(FileIO.read("examples/teams.tbl"));
+
+        int rows = 0;
+        for (Value[] row : table) {
+            assertEquals(row.length, table.columnCount());
+            rows++;
+        }
+
+        assertEquals(rows, table.rowCount());
+    }
+
+    @Test
     public void testInsert() {
-        Value[] values = new Value[] {new StringValue("First"),
-                                      new IntValue(2), new FloatValue(-1.5)};
-        String[] columnNames = new String[] {"Name", "Count", "Balance"};
+        String[] columnNames = new String[] {"name", "count", "balance"};
         Type[] columnTypes = new Type[] {Type.STRING, Type.INT, Type.FLOAT};
         Table table = new Table(columnNames, columnTypes);
-        table.insert(values);
+        assertEquals(3, table.columnCount());
+
+        table.insert(new Value[] {new StringValue("First"),
+                                  new IntValue(2), new FloatValue(-1.5)});
+        assertEquals(1, table.rowCount());
+
+        String expected = "name string,count int,balance float\n"
+                        + "'First',2,-1.500";
+        assertEquals(expected, table.toString());
+
+        table.insert(new Value[] {MagicValue.NOVALUE, MagicValue.NAN,
+                                  new FloatValue(5)});
+        assertEquals(2, table.rowCount());
+        assertEquals(3, table.columnCount());
+
+        expected = "name string,count int,balance float\n"
+                        + "'First',2,-1.500\n"
+                        + "NOVALUE,NAN,5.000";
+        assertEquals(expected, table.toString());
     }
 
     @Test

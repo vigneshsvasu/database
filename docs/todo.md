@@ -21,3 +21,4 @@ From highest to lowest priority:
   * [ ] ~~Internal tests~~ (Internal tests have been striked because tests should focus on external behavior, not private implementation details.)
 * [ ] Documentation
 * [ ] Add `DatabaseException` "cause" constructor
+* [ ] Implement object methods
