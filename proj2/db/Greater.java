@@ -3,7 +3,7 @@ package db;
 /**
  * Created by vigneshvasu on 3/5/17.
  */
-public class Greater {
+public class Greater implements Condition{
     public boolean apply(Value left, Value right){
         return false;
     }
