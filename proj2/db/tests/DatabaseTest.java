@@ -28,4 +28,28 @@ public class DatabaseTest {
         assertEquals(repr, db.transact("print t1"));
         tableFile.delete();
     }
+
+    @Test
+    public void testTableCreation() {
+        Database db = new Database();
+
+        String message = db.transact("create table example (x int,y string)");
+        assertTrue(message.isEmpty());
+
+        message = db.transact("create table example (z float)");
+        assertTrue(message.startsWith("ERROR"));
+
+        // TODO: add selects
+    }
+
+    @Test
+    public void testTableDeletion() {
+        Database db = new Database();
+
+        String message = db.transact("drop table example");
+        assertTrue(message.startsWith("ERROR"));
+
+        message = db.transact("create table example (x int)");
+        assertTrue(db.transact("drop table example").isEmpty());
+    }
 }

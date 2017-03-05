@@ -5,7 +5,6 @@ import org.junit.Test;
 
 import java.util.regex.Matcher;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 
 import db.Parser;

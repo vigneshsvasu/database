@@ -18,7 +18,7 @@ import db.IntValue;
 import db.FloatValue;
 import db.StringValue;
 
-public class FileIOTest{
+public class FileIOTest {
     @Test
     public void testRead() throws IOException, DatabaseException {
         BufferedReader reader = FileIO.read("examples/t7.tbl");
