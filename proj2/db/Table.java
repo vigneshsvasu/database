@@ -287,6 +287,7 @@ public class Table implements Iterable<Comparable[]> {
                         result = Operator.multiply(leftOperand, rightOperand, resultName);
                         break;
                     case "/":
+                        result = Operator.divide(leftOperand, rightOperand, resultName);
                         break;
                     default:
                         throw new DatabaseException(String.format("no operator \"%c\"", operator));

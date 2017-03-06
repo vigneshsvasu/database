@@ -33,14 +33,14 @@ public enum Type {
         }
     }
 
-    public Comparable getNAN() throws InvalidSyntaxException {
+    public Comparable getNAN() {
         switch (this) {
             case INT:
                 return INT_NAN;
             case FLOAT:
                 return FLOAT_NAN;
             default:
-                throw new InvalidSyntaxException("NAN only available for numeric types");
+                throw new IllegalArgumentException("NAN only available for numeric types");
         }
     }
 
