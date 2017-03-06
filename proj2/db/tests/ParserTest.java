@@ -10,7 +10,6 @@ import java.io.IOException;
 import db.Parser;
 import db.Table;
 import db.Type;
-import db.Value;
 import db.FileIO;
 import db.DatabaseException;
 
@@ -104,9 +103,9 @@ public class ParserTest {
         assertEquals(table.getType(3), Type.INT);  // Year established
 
         int index = 0;
-        for (Value[] row : table) {
-            assertEquals(row[0].toString(), '\'' + teamNames[index] + '\'');
-            assertEquals(row[3].toString(), years[index]);
+        for (Comparable[] row : table) {
+            assertEquals(table.getType(0).repr(row[0]), '\'' + teamNames[index] + '\'');
+            assertEquals(table.getType(3).repr(row[3]), years[index]);
             index++;
         }
     }

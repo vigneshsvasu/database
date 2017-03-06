@@ -5,7 +5,7 @@ import static db.DatabaseException.InvalidSyntaxException;
 public enum Type {
     INT(true), FLOAT(true), STRING(false);
 
-    private static final int INT_NAN_VALUE = 999;
+    private static final int INT_NAN_VALUE = Integer.MAX_VALUE;  // Not cached
     private static final Integer INT_NAN = new Integer(INT_NAN_VALUE);
     private static final Double FLOAT_NAN = Double.NaN;
 
@@ -33,14 +33,14 @@ public enum Type {
         }
     }
 
-    public Comparable getNAN() throws InvalidSyntaxException {
+    public Comparable getNAN() {
         switch (this) {
             case INT:
                 return INT_NAN;
             case FLOAT:
                 return FLOAT_NAN;
             default:
-                throw new InvalidSyntaxException("string cannot be NAN");
+                throw new IllegalArgumentException("string cannot be NAN");
         }
     }
 

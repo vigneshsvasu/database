@@ -9,11 +9,6 @@ import static db.Parser.parseTable;
 import db.DatabaseException;
 import db.Table;
 import db.Type;
-import db.Value;
-import db.IntValue;
-import db.FloatValue;
-import db.StringValue;
-import db.MagicValue;
 import db.FileIO;
 
 public class TableTest {
@@ -22,7 +17,7 @@ public class TableTest {
         Table table = parseTable(FileIO.read("examples/teams.tbl"));
 
         int rows = 0;
-        for (Value[] row : table) {
+        for (Comparable[] row : table) {
             assertEquals(row.length, table.columnCount());
             assertArrayEquals(table.getRow(rows), row);
             rows++;
@@ -51,16 +46,15 @@ public class TableTest {
         Table table = new Table(columnNames, columnTypes);
         assertEquals(3, table.columnCount());
 
-        table.insert(new Value[] {new StringValue("First"),
-                                  new IntValue(2), new FloatValue(-1.5)});
+        table.insert(new Comparable[] {"First", 2, -1.5});
         assertEquals(1, table.rowCount());
 
         String expected = "name string,count int,balance float\n"
                         + "'First',2,-1.500";
         assertEquals(expected, table.toString());
 
-        table.insert(new Value[] {MagicValue.NOVALUE, MagicValue.NAN,
-                                  new FloatValue(5)});
+        table.insert(new Comparable[] {Type.STRING.getNOVALUE(), Type.INT.getNAN(),
+                                  5.0});
         assertEquals(2, table.rowCount());
         assertEquals(3, table.columnCount());
 
@@ -91,10 +85,10 @@ public class TableTest {
         };
 
         for (int rowIndex = 0; rowIndex < t9.rowCount(); rowIndex++) {
-            Value[] row = t9.getRow(rowIndex);
+            Comparable[] row = t9.getRow(rowIndex);
             for (int columnIndex = 0; columnIndex < t9.columnCount(); columnIndex++) {
-                IntValue value = (IntValue) row[columnIndex];
-                assertEquals(expected[rowIndex][columnIndex], value.getValue());
+                int value = (Integer) row[columnIndex];
+                assertEquals(expected[rowIndex][columnIndex], value);
             }
         }
 
@@ -109,7 +103,7 @@ public class TableTest {
         // No values in common columns
         Table dummy = new Table(new String[] {"a", "x"},
                                 new Type[] {Type.INT, Type.INT});
-        dummy.insert(new Value[] {new IntValue(9), MagicValue.NAN});
+        dummy.insert(new Comparable[] {9, Type.INT.getNAN()});
         Table noCommonValues = dummy.join(t4);
         assertEquals(3, noCommonValues.columnCount());
         assertEquals(0, noCommonValues.rowCount());

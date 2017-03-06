@@ -1,5 +1,7 @@
 package db;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.StringJoiner;
 import java.util.Map;
@@ -129,16 +131,16 @@ public class Table implements Iterable<Comparable[]> {
         return rowJoiner.toString();
     }
 
-    /*
     private List<TableColumn> findCommonTableColumns(Table other) {
         List<TableColumn> commonTableColumns = new ArrayList<>();
         for (TableColumn column : columns) {
             for (TableColumn otherTableColumn : other.columns) {
-                if (column.name.equals(otherTableColumn.name)) {
-                    if (column.type != otherTableColumn.type) {
+                if (column.getName().equals(otherTableColumn.getName())) {
+                    if (column.getType() != otherTableColumn.getType()) {
                         // TODO: throw an exception
                     }
-                    commonTableColumns.add(new TableColumn(column.name, column.type));
+                    commonTableColumns.add(new TableColumn(column.getName(),
+                                           column.getType()));
                 }
             }
         }
@@ -151,13 +153,15 @@ public class Table implements Iterable<Comparable[]> {
 
         for (TableColumn column : columns) {
             if (!newTableColumns.contains(column)) {
-                newTableColumns.add(new TableColumn(column.name, column.type));
+                newTableColumns.add(new TableColumn(column.getName(),
+                                    column.getType()));
             }
         }
 
         for (TableColumn otherTableColumn : other.columns) {
             if (!newTableColumns.contains(otherTableColumn)) {
-                newTableColumns.add(new TableColumn(otherTableColumn.name, otherTableColumn.type));
+                newTableColumns.add(new TableColumn(otherTableColumn.getName(),
+                                    otherTableColumn.getType()));
             }
         }
 
@@ -168,10 +172,11 @@ public class Table implements Iterable<Comparable[]> {
         return new Table(newTableColumnsAsArray);
     }
 
-    private boolean shouldJoin(Value[] row, Value[] otherRow,
+    private boolean shouldJoin(Comparable[] row, Comparable[] otherRow,
             List<Integer> indices, List<Integer> otherIndices) {
         for (int index = 0; index < indices.size(); index++) {
-            if (!row[indices.get(index)].equals(otherRow[otherIndices.get(index)])) {
+            // TODO: CATASTROPHIC ERROR AHEAD
+            if (row[indices.get(index)].compareTo(otherRow[otherIndices.get(index)]) != 0) {
                 return false;
             }
         }
@@ -184,14 +189,14 @@ public class Table implements Iterable<Comparable[]> {
         List<Integer> otherIndices = new ArrayList<>(commonTableColumns.size());
         for (int index = 0; index < commonTableColumns.size(); index++) {
             TableColumn column = commonTableColumns.get(index);
-            indices.add(indexOf(column.name));
-            otherIndices.add(other.indexOf(column.name));
+            indices.add(indexOf(column.getName()));
+            otherIndices.add(other.indexOf(column.getName()));
         }
 
-        for (Value[] row : this) {
-            for (Value[] otherRow : other) {
+        for (Comparable[] row : this) {
+            for (Comparable[] otherRow : other) {
                 if (shouldJoin(row, otherRow, indices, otherIndices)) {
-                    Value[] newRow = new Value[result.columnCount()];
+                    Comparable[] newRow = new Comparable[result.columnCount()];
                     int runningIndex = 0;
 
                     for (int index : indices) {
@@ -223,5 +228,4 @@ public class Table implements Iterable<Comparable[]> {
         populateJoinedTable(result, other, commonTableColumns);
         return result;
     }
-    */
 }

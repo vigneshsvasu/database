@@ -36,6 +36,12 @@ public interface Column<T extends Comparable<T>> extends Iterable<T> {
         }
 
         @Override
+        public boolean equals(Object other) {
+            return other instanceof TableColumn &&
+                   ((TableColumn) other).getName().equals(name);
+        }
+
+        @Override
         public Type getType() {
             return type;
         }
