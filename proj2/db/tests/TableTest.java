@@ -40,7 +40,7 @@ public class TableTest {
     }
 
     @Test
-    public void testInsert() {
+    public void testInsert() throws DatabaseException {
         String[] columnNames = new String[] {"name", "count", "balance"};
         Type[] columnTypes = new Type[] {Type.STRING, Type.INT, Type.FLOAT};
         Table table = new Table(columnNames, columnTypes);

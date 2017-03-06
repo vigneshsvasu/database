@@ -41,9 +41,30 @@ public class Database {
         return select(match);
     }
 
-    private Table select(Matcher match) {
-        // TODO: implement this
-        return null;
+    private Table select(Matcher match) throws NoSuchTableException {
+        // Join tables
+        String[] tableNames = match.group("tables").split("\\s*,\\s*");
+        Table table = getTable(tableNames[0]);
+        for (int index = 1; index < tableNames.length; index++) {
+            table = table.join(getTable(tableNames[index]));
+        }
+
+        // Select columns
+        String columns = match.group("columns");
+        String[] columnExprs;
+        if (columns.equals(Parser.ALL_COLUMNS)) {
+            columnExprs = new String[table.columnCount()];
+            for (int index = 0; index < columnExprs.length; index++) {
+                columnExprs[index] = table.getName(index);
+            }
+        }
+        else {
+            columnExprs = match.group("columns").split("\\s*,\\s*");
+        }
+
+        // Filter with conditions
+
+        return table;
     }
 
     private String loadTable(Matcher match) throws DatabaseException {
@@ -102,7 +123,7 @@ public class Database {
         return "";
     }
 
-    private String selectTable(Matcher match) {
+    private String selectTable(Matcher match) throws NoSuchTableException {
         Table table = select(match);
         return table.toString();
     }

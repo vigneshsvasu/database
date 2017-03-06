@@ -11,6 +11,7 @@ import static db.DatabaseException.InvalidSyntaxException;
 public class Parser {
     public static final String COLUMN_DELIMETER = ",";
     public static final String ROW_DELIMETER = "\n";
+    public static final String ALL_COLUMNS = "*";
 
     private static final String NAME = "([a-zA-Z]\\w*)";
     private static final String TYPE = "(int|float|string)";
