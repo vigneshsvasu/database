@@ -35,6 +35,14 @@ public interface Column<T extends Comparable<T>> extends Iterable<T> {
             return name;
         }
 
+        public TableColumn copy() {
+            TableColumn copy = new TableColumn(name, type);
+            for (T item : values) {
+                copy.append(item);
+            }
+            return copy;
+        }
+
         @Override
         public boolean equals(Object other) {
             return other instanceof TableColumn &&

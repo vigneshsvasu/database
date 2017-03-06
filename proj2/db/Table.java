@@ -228,4 +228,14 @@ public class Table implements Iterable<Comparable[]> {
         populateJoinedTable(result, other, commonTableColumns);
         return result;
     }
+
+    public Table select() {
+        List<TableColumn> selectedColumns = new ArrayList<>();
+
+        TableColumn[] selectedColumnsArray = new TableColumn[selectedColumns.size()];
+        for (int index = 0; index < selectedColumns.size(); index++) {
+            selectedColumnsArray[index] = selectedColumns.get(index);
+        }
+        return new Table(selectedColumnsArray);
+    }
 }

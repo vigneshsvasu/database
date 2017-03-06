@@ -61,8 +61,13 @@ public class Database {
         else {
             columnExprs = match.group("columns").split("\\s*,\\s*");
         }
+        Parser.parseColumnExpressions(columnExprs);
 
         // Filter with conditions
+        String conditions = match.group("conditions");
+        if (conditions != null) {
+            String[] conditionExprs = conditions.split("\\s+and\\s+");
+        }
 
         return table;
     }
