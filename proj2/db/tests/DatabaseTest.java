@@ -62,20 +62,20 @@ public class DatabaseTest {
         assertTrue(message.isEmpty());
         assertEquals("x int,y string", db.transact("print example"));
 
-        message = db.transact("insert into example values NAN, 'Hello'");
+        message = db.transact("insert into example values NaN, 'Hello'");
         assertTrue(message.isEmpty());
 
         message = db.transact("insert into example 5, 'World'");
         assertTrue(message.startsWith("ERROR"));
 
         message = db.transact("print example");
-        assertEquals("x int,y string\nNAN,'Hello'", message);
+        assertEquals("x int,y string\nNaN,'Hello'", message);
 
         message = db.transact("insert into example values -5, NOVALUE");
         assertTrue(message.isEmpty());
 
         message = db.transact("print example");
-        assertEquals("x int,y string\nNAN,'Hello'\n-5,NOVALUE", message);
+        assertEquals("x int,y string\nNaN,'Hello'\n-5,NOVALUE", message);
     }
 
     @Test
@@ -83,11 +83,11 @@ public class DatabaseTest {
         Database db = new Database();
 
         db.transact("load examples/t8");
-        db.transact("insert into t8 values NAN, -1, 2");
+        db.transact("insert into t8 values NaN, -1, 2");
         db.transact("insert into t8 values NOVALUE, NOVALUE, 2");
 
         String message = db.transact("select w + 5 as f, b - 0.5 as g from t8");
-        assertEquals("f int,g float\n6,6.500\n12,6.500\n6,8.500\n6,10.500\nNAN,-1.500\n5,-0.500", message);
+        assertEquals("f int,g float\n6,6.500\n12,6.500\n6,8.500\n6,10.500\nNaN,-1.500\n5,-0.500", message);
 
         db.transact("load examples/fans");
         db.transact("insert into fans values NOVALUE, NOVALUE, 'Mets'");
@@ -113,10 +113,10 @@ public class DatabaseTest {
 
         db.transact("load examples/t8");
         db.transact("insert into t8 values NOVALUE, NOVALUE, NOVALUE");
-        db.transact("insert into t8 values NAN, NAN, NAN");
+        db.transact("insert into t8 values NaN, NaN, NaN");
 
-        String message = db.transact("select w from t8 where w >= NAN");
-        assertEquals("w int\nNAN", message);
+        String message = db.transact("select w from t8 where w >= NaN");
+        assertEquals("w int\nNaN", message);
         message = db.transact("select w from t8 where w<7");
         assertEquals("w int\n1\n1\n1", message);
     }

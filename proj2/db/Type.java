@@ -9,7 +9,7 @@ public enum Type {
     private static final Double FLOAT_NAN = new Double(FLOAT_NAN_VALUE);
 
     public static final String NOVALUE_REPR = "NOVALUE";
-    public static final String NAN_REPR = "NAN";
+    public static final String NAN_REPR = "NaN";
 
     private boolean isNumeric;
 

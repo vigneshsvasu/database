@@ -60,7 +60,7 @@ public class TableTest {
 
         expected = "name string,count int,balance float\n"
                         + "'First',2,-1.500\n"
-                        + "NOVALUE,NAN,5.000";
+                        + "NOVALUE,NaN,5.000";
         assertEquals(expected, table.toString());
     }
 
