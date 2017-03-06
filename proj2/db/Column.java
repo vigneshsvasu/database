@@ -9,17 +9,19 @@ public interface Column<T extends Comparable<T>> extends Iterable<T> {
     int length();
     T get(int index);
 
-    public static abstract class NonuniformColumn<T extends Comparable<T>> implements Column<T> {
+    class TableColumn<T extends Comparable<T>> implements Column<T> {
+        private final String name;
         private final Type type;
         private final List<T> values;
 
-        public NonuniformColumn(Type type) {
+        public TableColumn(String name, Type type) {
+            this.name = name;
             this.type = type;
             values = new ArrayList<>();
         }
 
-        public NonuniformColumn(Type type, T[] values) {
-            this(type);
+        public TableColumn(String name, Type type, T[] values) {
+            this(name, type);
             for (T value : values) {
                 this.values.add(value);
             }
@@ -48,38 +50,14 @@ public interface Column<T extends Comparable<T>> extends Iterable<T> {
         public Iterator<T> iterator() {
             return values.iterator();
         }
-
-        public static class IntColumn extends NonuniformColumn<Integer> {
-            private final Integer NAN = new Integer(-1);
-
-            public IntColumn() {
-                super(Type.INT);
-            }
-
-            public IntColumn(Integer[] values) {
-                super(Type.INT, values);
-            }
-        }
-
-        public static class FloatColumn extends NonuniformColumn<Double> {
-            public FloatColumn() {
-                super(Type.FLOAT);
-            }
-        }
-
-        public static class StringColumn extends NonuniformColumn<String> {
-            public StringColumn() {
-                super(Type.STRING);
-            }
-        }
     }
 
-    public static class UniformColumn<T extends Comparable<T>> implements Column<T> {
+    class TemporaryColumn<T extends Comparable<T>> implements Column<T> {
         private final Type type;
         private final T value;
         private final int length;
 
-        public UniformColumn(Type type, T value, int length) {
+        public TemporaryColumn(Type type, T value, int length) {
             this.type = type;
             this.value = value;
             this.length = length;

@@ -36,7 +36,7 @@ public class Parser {
     private static final Pattern COLUMN_METADATA_PATTERN = makeRegex(
         NAME + "\\s+" + TYPE);
     private static final Pattern COLUMN_EXPR = makeRegex(NAME + "\\s+"
-        + OPERATORS + "(?:\\s+as\\s+" + NAME + ")?")
+        + OPERATORS + "\\s+\\S+(?:\\s+as\\s+" + NAME + ")?");
 
     private static Pattern makeRegex(String baseExpr) {
         return Pattern.compile("^\\s*" + baseExpr + "\\s*$");
