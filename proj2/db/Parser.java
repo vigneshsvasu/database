@@ -15,6 +15,7 @@ public class Parser {
     private static final String NAME = "([a-zA-Z]\\w*)";
     private static final String TYPE = "(int|float|string)";
     private static final String FILE_PATH = "(?<path>(.+\\/)*" + NAME + ")";
+    private static fainl String OPERATORS = "(\\+|-|\\*|/)";
 
     // Command patterns
     private static final Pattern LOAD_CMD = makeCommand("load", FILE_PATH);
@@ -34,6 +35,8 @@ public class Parser {
     // Common patterns
     private static final Pattern COLUMN_METADATA_PATTERN = makeRegex(
         NAME + "\\s+" + TYPE);
+    private static final Pattern COLUMN_EXPR = makeRegex(NAME + "\\s+"
+        + OPERATORS + "(?:\\s+as\\s+" + NAME + ")?")
 
     private static Pattern makeRegex(String baseExpr) {
         return Pattern.compile("^\\s*" + baseExpr + "\\s*$");
