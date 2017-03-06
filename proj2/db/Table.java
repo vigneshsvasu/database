@@ -257,25 +257,42 @@ public class Table implements Iterable<Comparable[]> {
                 Column rightOperand;
                 if (!columnLookupTable.containsKey(rightOperandRepr)) {
                     Type type = leftOperand.getType();
-                    Comparable value = Parser.parseValue(rightOperandRepr, type);
+                    Comparable value;
+                    try {
+                        value = Parser.parseValue(rightOperandRepr, type);
+                    } catch (NumberFormatException exc) {
+                        try {
+                            value = Parser.parseValue(rightOperandRepr, Type.FLOAT);
+                            type = Type.FLOAT;
+                        } catch (NumberFormatException exc2) {  // TODO: fix
+                            throw new DatabaseException("could not parse value");
+                        }
+                    }
                     rightOperand = new TemporaryColumn(type, value, leftOperand.length());
                 } else {
                     rightOperand = columnLookupTable.get(rightOperandRepr);
                 }
 
                 String operator = match.group(2);
+                TableColumn result = null;
+                String resultName = match.group(4);
                 switch (operator) {
                     case "+":
+                        result = Operator.add(leftOperand, rightOperand, resultName);
                         break;
                     case "-":
+                        result = Operator.subtract(leftOperand, rightOperand, resultName);
                         break;
                     case "*":
+                        result = Operator.multiply(leftOperand, rightOperand, resultName);
                         break;
                     case "/":
                         break;
                     default:
                         throw new DatabaseException(String.format("no operator \"%c\"", operator));
                 }
+
+                selectedColumns.add(result);
             }
         }
 

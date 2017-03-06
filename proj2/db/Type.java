@@ -40,7 +40,7 @@ public enum Type {
             case FLOAT:
                 return FLOAT_NAN;
             default:
-                throw new InvalidSyntaxException("string cannot be NAN");
+                throw new InvalidSyntaxException("NAN only available for numeric types");
         }
     }
 
@@ -66,6 +66,19 @@ public enum Type {
                 return String.format("%.3f", (Double) value);
             case STRING:
                 return '\'' + value.toString() + '\'';
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
+    public Comparable zeroValue() {
+        switch (this) {
+            case INT:
+                return 0;
+            case FLOAT:
+                return 0.0;
+            case STRING:
+                return "";
             default:
                 throw new IllegalArgumentException();
         }
