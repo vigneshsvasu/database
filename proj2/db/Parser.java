@@ -15,7 +15,7 @@ public class Parser {
     private static final String NAME = "([a-zA-Z]\\w*)";
     private static final String TYPE = "(int|float|string)";
     private static final String FILE_PATH = "(?<path>(.+\\/)*" + NAME + ")";
-    private static fainl String OPERATORS = "(\\+|-|\\*|/)";
+    private static final String OPERATORS = "(\\+|-|\\*|/)";
 
     // Command patterns
     private static final Pattern LOAD_CMD = makeCommand("load", FILE_PATH);
@@ -90,25 +90,29 @@ public class Parser {
         return constructEmptyTable(columnMetadata.split(COLUMN_DELIMETER));
     }
 
-    private static Value parseValue(String repr, Type type)
-                         throws InvalidSyntaxException {
+    private static String unquote(String strRepr) throws InvalidSyntaxException {
+        if (strRepr.length() < 2 || strRepr.charAt(0) != '\'' ||
+                strRepr.charAt(strRepr.length() - 1) != '\'') {
+            throw new InvalidSyntaxException("string literal must be single-quoted");
+        }
+        return strRepr.substring(1, strRepr.length() - 1);
+    }
+
+    public static Comparable parseValue(String repr, Type type)
+                              throws InvalidSyntaxException {
+        if (repr.equals(Type.NOVALUE_REPR)) {
+            return type.getNOVALUE();
+        } else if (repr.equals(Type.NAN_REPR)) {
+            return type.getNAN();
+        }
+
         switch (type) {
             case INT:
-                return new IntValue(Integer.parseInt(repr));
-
+                return Integer.parseInt(repr);
             case FLOAT:
-                return new FloatValue(Double.parseDouble(repr));
-
+                return Double.parseDouble(repr);
             case STRING:
-                char start = repr.charAt(0);
-                char end = repr.charAt(repr.length() - 1);
-                if (!(start == '\'' && end == '\'')) {
-                    String message = String.format(
-                      "string value \"%s\" not singly-quoted", repr);
-                    throw new InvalidSyntaxException(message);
-                }
-                return new StringValue(repr.substring(1, repr.length() - 1));
-
+                return unquote(repr);
             default:
                 throw new InvalidSyntaxException("no such type");
         }
@@ -124,26 +128,15 @@ public class Parser {
             throw new InvalidSyntaxException(message);
         }
 
-        Value[] values = new Value[numColumns];
+        Comparable[] values = new Comparable[numColumns];
         for (int index = 0; index < numColumns; index++) {
             String symbol = symbols[index].trim();
             Type type = table.getType(index);
-
-            if (MagicValue.NAN.equals(symbol)) {
-                if (type == Type.STRING) {
-                    throw new DatabaseException(
-                        "cannot store NAN in column of type \"string\"");
-                }
-                values[index] = MagicValue.NAN;
-            } else if (MagicValue.NOVALUE.equals(symbol)) {
-                values[index] = MagicValue.NOVALUE;
-            } else {
-                try {
-                    values[index] = parseValue(symbol, type);
-                } catch (NumberFormatException exc) {
-                    throw new DatabaseException(String.format(
-                        "malformed numeric literal \"%s\"", symbol));
-                }
+            try {
+                values[index] = parseValue(symbol, type);
+            } catch (NumberFormatException exc) {
+                throw new DatabaseException(String.format(
+                    "malformed numeric literal \"%s\"", symbol));
             }
         }
 

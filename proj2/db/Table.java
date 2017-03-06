@@ -107,21 +107,21 @@ public class Table implements Iterable<Comparable[]> {
         return row;
     }
 
-    /*
     public String toString() {
         StringJoiner rowJoiner = new StringJoiner(Parser.ROW_DELIMETER);
 
         StringJoiner columnJoiner = new StringJoiner(Parser.COLUMN_DELIMETER);
         for (TableColumn column : columns) {
-            columnJoiner.add(String.format("%s %s", column.name,
-                             column.type.name().toLowerCase()));
+            columnJoiner.add(String.format("%s %s", column.getName(),
+                             column.getType().name().toLowerCase()));
         }
         rowJoiner.add(columnJoiner.toString());
 
-        for (Value[] row : this) {
+        for (Comparable[] row : this) {
             columnJoiner = new StringJoiner(Parser.COLUMN_DELIMETER);
-            for (Value value : row) {
-                columnJoiner.add(value.toString());
+            assert row.length == columns.length;
+            for (int index = 0; index < row.length; index++) {
+                columnJoiner.add(columns[index].getType().repr(row[index]));
             }
             rowJoiner.add(columnJoiner.toString());
         }
@@ -129,6 +129,7 @@ public class Table implements Iterable<Comparable[]> {
         return rowJoiner.toString();
     }
 
+    /*
     private List<TableColumn> findCommonTableColumns(Table other) {
         List<TableColumn> commonTableColumns = new ArrayList<>();
         for (TableColumn column : columns) {
