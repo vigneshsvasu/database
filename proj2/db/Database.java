@@ -41,7 +41,7 @@ public class Database {
         return select(match);
     }
 
-    private Table select(Matcher match) throws NoSuchTableException {
+    private Table select(Matcher match) throws DatabaseException {
         // Join tables
         String[] tableNames = match.group("tables").split("\\s*,\\s*");
         Table table = getTable(tableNames[0]);
@@ -61,7 +61,7 @@ public class Database {
         else {
             columnExprs = match.group("columns").split("\\s*,\\s*");
         }
-        Parser.parseColumnExpressions(columnExprs);
+        table = table.select(columnExprs);
 
         // Filter with conditions
         String conditions = match.group("conditions");
@@ -128,7 +128,7 @@ public class Database {
         return "";
     }
 
-    private String selectTable(Matcher match) throws NoSuchTableException {
+    private String selectTable(Matcher match) throws DatabaseException {
         Table table = select(match);
         return table.toString();
     }

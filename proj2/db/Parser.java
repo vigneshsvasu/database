@@ -37,7 +37,7 @@ public class Parser {
     private static final Pattern COLUMN_METADATA_PATTERN = makeRegex(
         NAME + "\\s+" + TYPE);
     private static final Pattern COLUMN_EXPR_ALIAS_PATTERN = makeRegex(NAME
-        + "\\s+" + OPERATORS + "\\s+\\S+(?:\\s+as\\s+" + NAME + ")?");
+        + "\\s+" + OPERATORS + "\\s+\\S+\\s+as\\s+" + NAME);
 
     private static Pattern makeRegex(String baseExpr) {
         return Pattern.compile("^\\s*" + baseExpr + "\\s*$");
@@ -58,18 +58,13 @@ public class Parser {
         return null;
     }
 
-    public static void parseColumnExpressions(String[] columnExprs) {
-        for (String columnExpr : columnExprs) {
-            //
-        }
-        /*
+    public static Matcher parseColumnExpression(String columnExpr) {
         Matcher match = COLUMN_EXPR_ALIAS_PATTERN.matcher(columnExpr);
         if (match.matches()) {
             return match;
         } else {
             return null;
         }
-        */
     }
 
     public static String extractTableName(String path) {

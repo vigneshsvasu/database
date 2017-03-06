@@ -6,8 +6,10 @@ import java.util.Iterator;
 import java.util.StringJoiner;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.regex.Matcher;
 
 import static db.Column.TableColumn;
+import static db.Column.TemporaryColumn;
 
 public class Table implements Iterable<Comparable[]> {
     @SuppressWarnings("unchecked")
@@ -56,6 +58,7 @@ public class Table implements Iterable<Comparable[]> {
     }
 
     private Table(TableColumn[] columns) {
+        assert columns.length != 0;
         this.columns = columns;
         columnLookupTable = new HashMap<>();
         for (TableColumn column : columns) {
@@ -229,11 +232,55 @@ public class Table implements Iterable<Comparable[]> {
         return result;
     }
 
-    public Table select() {
+    public Table select(String[] columnExprs) throws DatabaseException {
         List<TableColumn> selectedColumns = new ArrayList<>();
 
+        for (String columnExpr : columnExprs) {
+            Matcher match = Parser.parseColumnExpression(columnExpr);
+
+            if (match == null) {
+                int index = indexOf(columnExpr);
+                if (index == -1) {
+                    throw new DatabaseException(String.format("no column named \"%s\"", columnExpr));
+                } else {
+                    selectedColumns.add(columns[index].copy());
+                }
+            } else {
+                String leftOperandName = match.group(1);
+                if (!columnLookupTable.containsKey(leftOperandName)) {
+                    throw new DatabaseException(String.format(
+                        "no column named \"%s\"", leftOperandName));
+                }
+                TableColumn leftOperand = columnLookupTable.get(leftOperandName);
+
+                String rightOperandRepr = match.group(3);
+                Column rightOperand;
+                if (!columnLookupTable.containsKey(rightOperandRepr)) {
+                    Type type = leftOperand.getType();
+                    Comparable value = Parser.parseValue(rightOperandRepr, type);
+                    rightOperand = new TemporaryColumn(type, value, leftOperand.length());
+                } else {
+                    rightOperand = columnLookupTable.get(rightOperandRepr);
+                }
+
+                String operator = match.group(2);
+                switch (operator) {
+                    case "+":
+                        break;
+                    case "-":
+                        break;
+                    case "*":
+                        break;
+                    case "/":
+                        break;
+                    default:
+                        throw new DatabaseException(String.format("no operator \"%c\"", operator));
+                }
+            }
+        }
+
         TableColumn[] selectedColumnsArray = new TableColumn[selectedColumns.size()];
-        for (int index = 0; index < selectedColumns.size(); index++) {
+        for (int index = 0; index < selectedColumnsArray.length; index++) {
             selectedColumnsArray[index] = selectedColumns.get(index);
         }
         return new Table(selectedColumnsArray);

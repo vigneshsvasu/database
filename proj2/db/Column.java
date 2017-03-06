@@ -44,6 +44,11 @@ public interface Column<T extends Comparable<T>> extends Iterable<T> {
         }
 
         @Override
+        public int hashCode() {
+            return name.hashCode();
+        }
+
+        @Override
         public boolean equals(Object other) {
             return other instanceof TableColumn &&
                    ((TableColumn) other).getName().equals(name);
