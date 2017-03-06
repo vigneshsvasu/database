@@ -80,16 +80,44 @@ public class DatabaseTest {
 
     @Test
     public void testSelect() {
-        // TODO: when select is done
+        Database db = new Database();
+
+        db.transact("load examples/t8");
+        db.transact("insert into t8 values (NAN, -1, 2)");
+        db.transact("insert into t8 values (NOVALUE, NOVALUE, 2)");
+
+        String message = db.transact("select w + 5 as f, b - 0.5 as g from t8");
+        assertEquals("f int,g float\n6,6.500\n12,6.500\n6,8.500\n6,10.500\nNAN,-1.500\n5,-0.500", message);
+
+        db.transact("load examples/fans");
+        db.transact("insert into fans values (NOVALUE, NOVALUE, 'Mets')");
+        message = db.transact("select Firstname +Lastname as Fullname from fans "
+            + "where Fullname >= 'M' and Fullname<='MitasRay'");
+        assertEquals("Fullname string\n'MauriceLee'\n'MauriceLee'\n'MitasRay'", message);
     }
 
     @Test
     public void testSelectWithJoin() {
-        // TODO: when select is done
+        Database db = new Database();
+
+        db.transact("load examples/t1");
+        db.transact("load examples/t2");
+
+        String message = db.transact("select * from t1, t2");
+        assertEquals("x int,y int,z int\n2,5,4\n8,3,9", message);
     }
 
     @Test
     public void testConditionalSelect() {
-        // TODO: when select is done
+        Database db = new Database();
+
+        db.transact("load examples/t8");
+        db.transact("insert into t8 values (NOVALUE, NOVALUE, NOVALUE)");
+        db.transact("insert into t8 values (NAN, NAN, NAN)");
+
+        String message = db.transact("select w from t8 where w >= NAN");
+        assertEquals("w int\nNAN", message);
+        message = db.transact("select w from t8 where w<7");
+        assertEquals("w int\n1\n1\n1", message);
     }
 }

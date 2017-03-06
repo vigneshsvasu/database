@@ -17,7 +17,7 @@ public class Parser {
     private static final String TYPE = "(int|float|string)";
     private static final String FILE_PATH = "(?<path>(.+\\/)*" + NAME + ")";
     private static final String OPERATORS = "(\\+|-|\\*|/)";
-    private static final String COMPARATORS = "(==|!=|<|<=|>|>=)";
+    private static final String COMPARATORS = "(==|!=|<=|>=|<|>){1}+";
 
     // Command patterns
     private static final Pattern LOAD_CMD = makeCommand("load", FILE_PATH);
@@ -38,9 +38,9 @@ public class Parser {
     private static final Pattern COLUMN_METADATA_PATTERN = makeRegex(
         NAME + "\\s+" + TYPE);
     private static final Pattern COLUMN_EXPR_ALIAS_PATTERN = makeRegex(NAME
-        + "\\s*" + OPERATORS + "\\s*(.+)\\s+as\\s+" + NAME);
+        + "\\s*" + OPERATORS + "\\s*(.+?)\\s+as\\s+" + NAME);
     private static final Pattern CONDITION_PATTERN = makeRegex(NAME + "\\s*"
-        + COMPARATORS + "\\s*(.+)");
+        + COMPARATORS + "\\s*(.+?)");
 
     private static Pattern makeRegex(String baseExpr) {
         return Pattern.compile("^\\s*" + baseExpr + "\\s*$");
@@ -113,8 +113,9 @@ public class Parser {
     }
 
     private static String unquote(String strRepr) throws InvalidSyntaxException {
-        if (strRepr.length() < 2 || strRepr.charAt(0) != '\'' ||
-                strRepr.charAt(strRepr.length() - 1) != '\'') {
+        if (strRepr.length() < 2 || strRepr.charAt(0) != '\''
+                || strRepr.charAt(strRepr.length() - 1) != '\'') {
+            System.out.println(strRepr);
             throw new InvalidSyntaxException("string literal must be single-quoted");
         }
         return strRepr.substring(1, strRepr.length() - 1);

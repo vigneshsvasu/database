@@ -10,7 +10,7 @@ public interface Column<T extends Comparable<T>> extends Iterable<T> {
     T get(int index);
 
     @Override
-    default public Iterator<T> iterator() {
+    default Iterator<T> iterator() {
         return new Iterator<T>() {
             private int index = 0;
 
@@ -69,8 +69,8 @@ public interface Column<T extends Comparable<T>> extends Iterable<T> {
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof TableColumn &&
-                   ((TableColumn) other).getName().equals(name);
+            return other instanceof TableColumn
+                && ((TableColumn) other).getName().equals(name);
         }
 
         @Override

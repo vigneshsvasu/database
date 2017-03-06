@@ -1,13 +1,12 @@
 package db;
 
-import static db.DatabaseException.InvalidSyntaxException;
-
 public enum Type {
     INT(true), FLOAT(true), STRING(false);
 
     private static final int INT_NAN_VALUE = Integer.MAX_VALUE;  // Not cached
+    private static final double FLOAT_NAN_VALUE = Double.MAX_VALUE;
     private static final Integer INT_NAN = new Integer(INT_NAN_VALUE);
-    private static final Double FLOAT_NAN = Double.NaN;
+    private static final Double FLOAT_NAN = new Double(FLOAT_NAN_VALUE);
 
     public static final String NOVALUE_REPR = "NOVALUE";
     public static final String NAN_REPR = "NAN";

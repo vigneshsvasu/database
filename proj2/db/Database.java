@@ -7,7 +7,6 @@ import java.util.regex.Matcher;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 
-import static db.DatabaseException.InvalidSyntaxException;
 import static db.DatabaseException.NoSuchTableException;
 import static db.DatabaseException.TableAlreadyExistsException;
 
@@ -57,8 +56,7 @@ public class Database {
             for (int index = 0; index < columnExprs.length; index++) {
                 columnExprs[index] = table.getName(index);
             }
-        }
-        else {
+        } else {
             columnExprs = match.group("columns").split("\\s*,\\s*");
         }
         table = table.select(columnExprs);
@@ -99,7 +97,7 @@ public class Database {
 
         Table table = getTable(name);
         try {
-            FileIO.write(path, table.toString().trim() + "\n");  // TODO: fix?
+            FileIO.write(path, table.toString().trim() + "\n");
         } catch (IOException exc) {
             throw new DatabaseException(exc.getMessage());
         }

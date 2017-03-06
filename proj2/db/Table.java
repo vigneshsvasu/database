@@ -112,7 +112,7 @@ public class Table implements Iterable<Comparable[]> {
         }
     }
 
-    public Comparable[] getRow(int rowIndex){
+    public Comparable[] getRow(int rowIndex) {
         Comparable[] row = new Comparable[columnCount()];
         for (int columnIndex = 0; columnIndex < row.length; columnIndex++) {
             row[columnIndex] = columns[columnIndex].get(rowIndex);
@@ -147,9 +147,6 @@ public class Table implements Iterable<Comparable[]> {
         for (TableColumn column : columns) {
             for (TableColumn otherTableColumn : other.columns) {
                 if (column.getName().equals(otherTableColumn.getName())) {
-                    if (column.getType() != otherTableColumn.getType()) {
-                        // TODO: throw an exception
-                    }
                     commonTableColumns.add(new TableColumn(column.getName(),
                                            column.getType()));
                 }
@@ -186,7 +183,6 @@ public class Table implements Iterable<Comparable[]> {
     private boolean shouldJoin(Comparable[] row, Comparable[] otherRow,
             List<Integer> indices, List<Integer> otherIndices) {
         for (int index = 0; index < indices.size(); index++) {
-            // TODO: CATASTROPHIC ERROR AHEAD
             if (row[indices.get(index)].compareTo(otherRow[otherIndices.get(index)]) != 0) {
                 return false;
             }
@@ -211,7 +207,7 @@ public class Table implements Iterable<Comparable[]> {
                     int runningIndex = 0;
 
                     for (int index : indices) {
-                        newRow[runningIndex++] = row[index];  // TODO: cloning?
+                        newRow[runningIndex++] = row[index];
                     }
 
                     for (int index = 0; index < columns.length; index++) {
@@ -249,7 +245,8 @@ public class Table implements Iterable<Comparable[]> {
             if (match == null) {
                 int index = indexOf(columnExpr);
                 if (index == -1) {
-                    throw new DatabaseException(String.format("no column named \"%s\"", columnExpr));
+                    throw new DatabaseException(String.format(
+                        "no column named \"%s\"", columnExpr));
                 } else {
                     selectedColumns.add(columns[index].copy());
                 }
@@ -272,7 +269,7 @@ public class Table implements Iterable<Comparable[]> {
                         try {
                             type = Type.FLOAT;
                             value = Parser.parseValue(rightOperandRepr, type);
-                        } catch (NumberFormatException exc2) {  // TODO: fix
+                        } catch (NumberFormatException exc2) {
                             throw new DatabaseException("could not parse value");
                         }
                     }
@@ -312,7 +309,8 @@ public class Table implements Iterable<Comparable[]> {
         return new Table(selectedColumnsArray);
     }
 
-    private <U extends Comparable<U>> Condition<U> makeCond(String operator) throws DatabaseException {
+    private <U extends Comparable<U>> Condition<U> makeCond(String operator)
+            throws DatabaseException {
         switch (operator) {
             case "==":
                 return new EqualToCondition<>();
@@ -353,24 +351,32 @@ public class Table implements Iterable<Comparable[]> {
     private boolean[] compare(Column left, Column right, String operator) throws DatabaseException {
         Condition cond = null;
         boolean[] toKeep = new boolean[left.length()];
-        Type leftType = left.getType(), rightType = right.getType();
+        Type leftType = left.getType(), rightType = right.getType(), resultType;
         if (leftType == Type.STRING && rightType == Type.STRING) {
-            cond = this.<String> makeCond(operator);
+            cond = this.<String>makeCond(operator);
+            resultType = Type.STRING;
         } else if (leftType == Type.INT && rightType == Type.INT) {
-            cond = this.<Integer> makeCond(operator);
+            cond = this.<Integer>makeCond(operator);
+            resultType = Type.INT;
         } else if (leftType == Type.FLOAT || rightType == Type.FLOAT) {
-            cond = this.<Double> makeCond(operator);
+            cond = this.<Double>makeCond(operator);
             if (leftType == Type.INT) {
                 left = coerce(left);
             } else {
                 right = coerce(right);
             }
+            resultType = Type.FLOAT;
         } else {
             throw new DatabaseException("incomparable types");
         }
 
         for (int index = 0; index < left.length(); index++) {
-            toKeep[index] = cond.apply(left.get(index), right.get(index));
+            Comparable leftValue = left.get(index), rightValue = right.get(index);
+            if (resultType.isNOVALUE(leftValue) || resultType.isNOVALUE(rightValue)) {
+                toKeep[index] = false;
+            } else {
+                toKeep[index] = cond.apply(leftValue, rightValue);
+            }
         }
         return toKeep;
     }
@@ -389,7 +395,8 @@ public class Table implements Iterable<Comparable[]> {
             String rightOperandRepr = match.group(3);
 
             if (!columnLookupTable.containsKey(leftOperandName)) {
-                throw new DatabaseException(String.format("no such column \"%s\"", leftOperandName));
+                throw new DatabaseException(String.format(
+                    "no such column \"%s\"", leftOperandName));
             }
 
             TableColumn leftOperand = columnLookupTable.get(leftOperandName);
