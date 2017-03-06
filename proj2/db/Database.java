@@ -67,6 +67,7 @@ public class Database {
         String conditions = match.group("conditions");
         if (conditions != null) {
             String[] conditionExprs = conditions.split("\\s+and\\s+");
+            table.filter(conditionExprs);
         }
 
         return table;

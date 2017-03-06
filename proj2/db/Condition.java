@@ -1,44 +1,44 @@
 package db;
 
-public interface Condition<T extends Number & Comparable<T>> {
+public interface Condition<T extends Comparable<T>> {
     boolean apply(T left, T right);
 
-    class EqualToCondition<T extends Number & Comparable<T>> implements Condition<T> {
+    class EqualToCondition<T extends Comparable<T>> implements Condition<T> {
         @Override
         public boolean apply(T left, T right) {
             return left.compareTo(right) == 0;
         }
     }
 
-    class NotEqualToCondition<T extends Number & Comparable<T>> implements Condition<T> {
+    class NotEqualToCondition<T extends Comparable<T>> implements Condition<T> {
         @Override
         public boolean apply(T left, T right) {
             return left.compareTo(right) != 0;
         }
     }
 
-    class LessThanCondition<T extends Number & Comparable<T>> implements Condition<T> {
+    class LessThanCondition<T extends Comparable<T>> implements Condition<T> {
         @Override
         public boolean apply(T left, T right) {
             return left.compareTo(right) < 0;
         }
     }
 
-    class LessThanOrEqualToCondition<T extends Number & Comparable<T>> implements Condition<T> {
+    class LessThanOrEqualToCondition<T extends  Comparable<T>> implements Condition<T> {
         @Override
         public boolean apply(T left, T right) {
             return left.compareTo(right) <= 0;
         }
     }
 
-    class GreaterThanCondition<T extends Number & Comparable<T>> implements Condition<T> {
+    class GreaterThanCondition<T extends Comparable<T>> implements Condition<T> {
         @Override
         public boolean apply(T left, T right) {
             return left.compareTo(right) > 0;
         }
     }
 
-    class GreaterThanOrEqualToCondition<T extends Number & Comparable<T>> implements Condition<T> {
+    class GreaterThanOrEqualToCondition<T extends Comparable<T>> implements Condition<T> {
         @Override
         public boolean apply(T left, T right) {
             return left.compareTo(right) >= 0;

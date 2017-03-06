@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 
 import static db.Column.TableColumn;
 import static db.Column.TemporaryColumn;
+import static db.Condition.*;
 
 public class Table implements Iterable<Comparable[]> {
     @SuppressWarnings("unchecked")
@@ -40,6 +41,13 @@ public class Table implements Iterable<Comparable[]> {
                 row[index] = columnIterators[index].next();
             }
             return row;
+        }
+
+        @Override
+        public void remove() {
+            for (int index = 0; index < columnIterators.length; index++) {
+                columnIterators[index].remove();
+            }
         }
     }
 
@@ -262,8 +270,8 @@ public class Table implements Iterable<Comparable[]> {
                         value = Parser.parseValue(rightOperandRepr, type);
                     } catch (NumberFormatException exc) {
                         try {
-                            value = Parser.parseValue(rightOperandRepr, Type.FLOAT);
                             type = Type.FLOAT;
+                            value = Parser.parseValue(rightOperandRepr, type);
                         } catch (NumberFormatException exc2) {  // TODO: fix
                             throw new DatabaseException("could not parse value");
                         }
@@ -302,5 +310,115 @@ public class Table implements Iterable<Comparable[]> {
             selectedColumnsArray[index] = selectedColumns.get(index);
         }
         return new Table(selectedColumnsArray);
+    }
+
+    private <U extends Comparable<U>> Condition<U> makeCond(String operator) throws DatabaseException {
+        switch (operator) {
+            case "==":
+                return new EqualToCondition<>();
+            case "!=":
+                return new NotEqualToCondition<>();
+            case "<":
+                return new LessThanCondition<>();
+            case "<=":
+                return new LessThanOrEqualToCondition<>();
+            case ">":
+                return new GreaterThanCondition<>();
+            case ">=":
+                return new GreaterThanOrEqualToCondition<>();
+            default:
+                throw new DatabaseException("no such comparator");
+        }
+    }
+
+    private Column<Double> coerce(Column<Integer> old) {
+        return new Column<Double>() {
+            @Override
+            public Type getType() {
+                return Type.FLOAT;
+            }
+
+            @Override
+            public int length() {
+                return old.length();
+            }
+
+            @Override
+            public Double get(int index) {
+                return (double) old.get(index);
+            }
+        };
+    }
+
+    private boolean[] compare(Column left, Column right, String operator) throws DatabaseException {
+        Condition cond = null;
+        boolean[] toKeep = new boolean[left.length()];
+        Type leftType = left.getType(), rightType = right.getType();
+        if (leftType == Type.STRING && rightType == Type.STRING) {
+            cond = this.<String> makeCond(operator);
+        } else if (leftType == Type.INT && rightType == Type.INT) {
+            cond = this.<Integer> makeCond(operator);
+        } else if (leftType == Type.FLOAT || rightType == Type.FLOAT) {
+            cond = this.<Double> makeCond(operator);
+            if (leftType == Type.INT) {
+                left = coerce(left);
+            } else {
+                right = coerce(right);
+            }
+        } else {
+            throw new DatabaseException("incomparable types");
+        }
+
+        for (int index = 0; index < left.length(); index++) {
+            toKeep[index] = cond.apply(left.get(index), right.get(index));
+        }
+        return toKeep;
+    }
+
+    public void filter(String[] conditionExprs) throws DatabaseException {
+        for (String conditionExpr : conditionExprs) {
+            Matcher match = Parser.parseConditionExpression(conditionExpr);
+
+            if (match == null) {
+                throw new DatabaseException(String.format(
+                    "invalid conditional expression \"%s\"", conditionExpr));
+            }
+
+            String leftOperandName = match.group(1);
+            String operator = match.group(2);
+            String rightOperandRepr = match.group(3);
+
+            if (!columnLookupTable.containsKey(leftOperandName)) {
+                throw new DatabaseException(String.format("no such column \"%s\"", leftOperandName));
+            }
+
+            TableColumn leftOperand = columnLookupTable.get(leftOperandName);
+            Column rightOperand;
+            if (!columnLookupTable.containsKey(rightOperandRepr)) {
+                Type type = leftOperand.getType();
+                Comparable value;
+                try {
+                    value = Parser.parseValue(rightOperandRepr, type);
+                } catch (NumberFormatException exc) {
+                    try {
+                        value = Parser.parseValue(rightOperandRepr, Type.FLOAT);
+                    } catch (NumberFormatException exc2) {
+                        throw new DatabaseException("could not parse value");
+                    }
+                }
+                rightOperand = new TemporaryColumn(type, value, leftOperand.length());
+            } else {
+                rightOperand = columnLookupTable.get(rightOperandRepr);
+            }
+
+            boolean[] toKeep = compare(leftOperand, rightOperand, operator);
+            RowIterator rowIterator = new RowIterator();
+            for (boolean shouldKeep : toKeep) {
+                rowIterator.next();
+                if (!shouldKeep) {
+                    rowIterator.remove();
+                }
+            }
+        }
     }
 }

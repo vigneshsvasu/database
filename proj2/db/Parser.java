@@ -17,6 +17,7 @@ public class Parser {
     private static final String TYPE = "(int|float|string)";
     private static final String FILE_PATH = "(?<path>(.+\\/)*" + NAME + ")";
     private static final String OPERATORS = "(\\+|-|\\*|/)";
+    private static final String COMPARATORS = "(==|!=|<|<=|>|>=)";
 
     // Command patterns
     private static final Pattern LOAD_CMD = makeCommand("load", FILE_PATH);
@@ -38,6 +39,8 @@ public class Parser {
         NAME + "\\s+" + TYPE);
     private static final Pattern COLUMN_EXPR_ALIAS_PATTERN = makeRegex(NAME
         + "\\s*" + OPERATORS + "\\s*(.+)\\s+as\\s+" + NAME);
+    private static final Pattern CONDITION_PATTERN = makeRegex(NAME + "\\s*"
+        + COMPARATORS + "\\s*(.+)");
 
     private static Pattern makeRegex(String baseExpr) {
         return Pattern.compile("^\\s*" + baseExpr + "\\s*$");
@@ -60,6 +63,15 @@ public class Parser {
 
     public static Matcher parseColumnExpression(String columnExpr) {
         Matcher match = COLUMN_EXPR_ALIAS_PATTERN.matcher(columnExpr);
+        if (match.matches()) {
+            return match;
+        } else {
+            return null;
+        }
+    }
+
+    public static Matcher parseConditionExpression(String conditionExpr) {
+        Matcher match = CONDITION_PATTERN.matcher(conditionExpr);
         if (match.matches()) {
             return match;
         } else {

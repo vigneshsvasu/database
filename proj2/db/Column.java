@@ -9,6 +9,25 @@ public interface Column<T extends Comparable<T>> extends Iterable<T> {
     int length();
     T get(int index);
 
+    @Override
+    default public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            private int index = 0;
+
+            @Override
+            public boolean hasNext() {
+                return 0 <= index && index < length();
+            }
+
+            @Override
+            public T next() {
+                T value = get(index);
+                index++;
+                return value;
+            }
+        };
+    }
+
     class TableColumn<T extends Comparable<T>> implements Column<T> {
         private final String name;
         private final Type type;
@@ -102,24 +121,6 @@ public interface Column<T extends Comparable<T>> extends Iterable<T> {
                 throw new IndexOutOfBoundsException();
             }
             return value;
-        }
-
-        @Override
-        public Iterator<T> iterator() {
-            return new Iterator<T>() {
-                private int index = 0;
-
-                @Override
-                public boolean hasNext() {
-                    return 0 <= index && index < length;
-                }
-
-                @Override
-                public T next() {
-                    index++;
-                    return value;
-                }
-            };
         }
     }
 }
