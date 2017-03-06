@@ -31,6 +31,10 @@ public interface Column<T extends Comparable<T>> extends Iterable<T> {
             values.add(item);
         }
 
+        public String getName() {
+            return name;
+        }
+
         @Override
         public Type getType() {
             return type;
