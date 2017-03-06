@@ -37,7 +37,7 @@ public class DatabaseTest {
         assertTrue(message.isEmpty());
 
         message = db.transact("create table example (z float)");
-        assertTrue(message.startsWith("ERROR"));
+        assertTrue(message.isEmpty());
 
         // TODO: create table with select
     }
@@ -62,16 +62,16 @@ public class DatabaseTest {
         assertTrue(message.isEmpty());
         assertEquals("x int,y string", db.transact("print example"));
 
-        message = db.transact("insert into example values (NAN, 'Hello')");
+        message = db.transact("insert into example values NAN, 'Hello'");
         assertTrue(message.isEmpty());
 
-        message = db.transact("insert into example (5, 'World')");
+        message = db.transact("insert into example 5, 'World'");
         assertTrue(message.startsWith("ERROR"));
 
         message = db.transact("print example");
         assertEquals("x int,y string\nNAN,'Hello'", message);
 
-        message = db.transact("insert into example values (-5, NOVALUE)");
+        message = db.transact("insert into example values -5, NOVALUE");
         assertTrue(message.isEmpty());
 
         message = db.transact("print example");
@@ -83,14 +83,14 @@ public class DatabaseTest {
         Database db = new Database();
 
         db.transact("load examples/t8");
-        db.transact("insert into t8 values (NAN, -1, 2)");
-        db.transact("insert into t8 values (NOVALUE, NOVALUE, 2)");
+        db.transact("insert into t8 values NAN, -1, 2");
+        db.transact("insert into t8 values NOVALUE, NOVALUE, 2");
 
         String message = db.transact("select w + 5 as f, b - 0.5 as g from t8");
         assertEquals("f int,g float\n6,6.500\n12,6.500\n6,8.500\n6,10.500\nNAN,-1.500\n5,-0.500", message);
 
         db.transact("load examples/fans");
-        db.transact("insert into fans values (NOVALUE, NOVALUE, 'Mets')");
+        db.transact("insert into fans values NOVALUE, NOVALUE, 'Mets'");
         message = db.transact("select Firstname +Lastname as Fullname from fans "
             + "where Fullname >= 'M' and Fullname<='MitasRay'");
         assertEquals("Fullname string\n'MauriceLee'\n'MauriceLee'\n'MitasRay'", message);
@@ -112,8 +112,8 @@ public class DatabaseTest {
         Database db = new Database();
 
         db.transact("load examples/t8");
-        db.transact("insert into t8 values (NOVALUE, NOVALUE, NOVALUE)");
-        db.transact("insert into t8 values (NAN, NAN, NAN)");
+        db.transact("insert into t8 values NOVALUE, NOVALUE, NOVALUE");
+        db.transact("insert into t8 values NAN, NAN, NAN");
 
         String message = db.transact("select w from t8 where w >= NAN");
         assertEquals("w int\nNAN", message);

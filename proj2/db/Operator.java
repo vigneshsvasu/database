@@ -184,7 +184,7 @@ public class Operator {
                         rightValue = (T) rightType.zeroValue();
                     }
                     if (rightValue.intValue() == 0 || rightValue.doubleValue() == 0.0) {
-                        result.append(rightType.getNAN());
+                        result.append(resultType.getNAN());
                     } else if (resultType == Type.FLOAT) {
                         result.append(leftValue.doubleValue() / rightValue.doubleValue());
                     } else {

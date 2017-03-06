@@ -26,9 +26,6 @@ public class Database {
 
     private void putTable(String name, Table table)
                  throws TableAlreadyExistsException {
-        if (tables.containsKey(name)) {
-            throw new TableAlreadyExistsException(name);
-        }
         tables.put(name, table);
     }
 

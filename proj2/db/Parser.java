@@ -29,7 +29,7 @@ public class Parser {
         "(?<columns>.+)\\s+from\\s+(?<tables>.+?)"
         + "(?:\\s+where\\s+(?<conditions>.+?))?");
     private static final Pattern INSERT_CMD = makeCommand("insert",
-        "into\\s+" + NAME + "\\s+values\\s+\\((?<literals>.+)\\)");
+        "into\\s+" + NAME + "\\s+values\\s+(?<literals>.+)");
     private static final Pattern PRINT_CMD = makeCommand("print", NAME);
     private static final Pattern[] COMMANDS = {LOAD_CMD, STORE_CMD, CREATE_CMD,
         DROP_CMD, SELECT_CMD, INSERT_CMD, PRINT_CMD};
