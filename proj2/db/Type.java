@@ -3,54 +3,68 @@ package db;
 public enum Type {
     INT(true), FLOAT(true), STRING(false);
 
-    private static final int INT_NAN_VALUE = Integer.MAX_VALUE;  // Not cached
-    private static final double FLOAT_NAN_VALUE = Double.MAX_VALUE;
-    private static final Integer INT_NAN = new Integer(INT_NAN_VALUE);
-    private static final Double FLOAT_NAN = new Double(FLOAT_NAN_VALUE);
+    private final Integer INT_NaN = new Integer(Integer.MAX_VALUE);  // Not cached
+    private final Double FLOAT_NaN = new Double(Double.MAX_VALUE);
+    private final Comparable NOVALUE = null;
 
+    public static final String NaN_REPR = "NaN";
     public static final String NOVALUE_REPR = "NOVALUE";
-    public static final String NAN_REPR = "NaN";
 
-    private boolean isNumeric;
+    public final boolean isNumeric;
 
     Type(boolean isNumeric) {
         this.isNumeric = isNumeric;
     }
 
-    public boolean isNumeric() {
-        return this.isNumeric;
-    }
-
-    public boolean isNAN(Comparable n) {
+    public boolean isNaN(Number n) {
         switch (this) {
             case INT:
-                return n == INT_NAN;
+                return n == INT_NaN;
             case FLOAT:
-                return n == FLOAT_NAN;
+                return n == FLOAT_NaN;
             default:
-                return false;
+                throw new IllegalArgumentException();
         }
     }
 
-    public Comparable getNAN() {
+    public Number getNaN() {
         switch (this) {
             case INT:
-                return INT_NAN;
+                return INT_NaN;
             case FLOAT:
-                return FLOAT_NAN;
+                return FLOAT_NaN;
             default:
-                throw new IllegalArgumentException("NAN only available for numeric types");
+                throw new IllegalArgumentException();
         }
     }
 
     public boolean isNOVALUE(Comparable value) {
-        return value == null;
+        return value == NOVALUE;
     }
 
     public Comparable getNOVALUE() {
-        return null;
+        return NOVALUE;
     }
 
+    public Comparable zeroValue() {
+        switch (this) {
+            case INT:
+                return 0;
+            case FLOAT:
+                return 0.0;
+            case STRING:
+                return "";
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
+    /*
+    public String repr() {
+    }
+    */
+
+    /*
     public String repr(Comparable value) {
         if (isNOVALUE(value)) {
             return NOVALUE_REPR;
@@ -82,4 +96,5 @@ public enum Type {
                 throw new IllegalArgumentException();
         }
     }
+    */
 }

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public interface Column<T extends Comparable<T>> extends Iterable<T> {
+public interface Column<T> extends Iterable<T> {
     Type getType();
     int length();
     T get(int index);
@@ -28,7 +28,7 @@ public interface Column<T extends Comparable<T>> extends Iterable<T> {
         };
     }
 
-    class TableColumn<T extends Comparable<T>> implements Column<T> {
+    class TableColumn<T> implements Column<T> {
         private final String name;
         private final Type type;
         private final List<T> values;
@@ -94,7 +94,7 @@ public interface Column<T extends Comparable<T>> extends Iterable<T> {
         }
     }
 
-    class TemporaryColumn<T extends Comparable<T>> implements Column<T> {
+    class TemporaryColumn<T> implements Column<T> {
         private final Type type;
         private final T value;
         private final int length;
