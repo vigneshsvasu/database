@@ -1,5 +1,5 @@
-# CS 61B Project 2: Database
+#Database
 
 * [Data structure design](design.md)
 * [Database API](API.md)
-* [Project to-do list](todo.md)
+* [To-do list](todo.md)
